@@ -2,26 +2,49 @@ import os
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
     QLabel, QFrame, QSplitter, QTableWidget, QTableWidgetItem, 
-    QHeaderView, QMessageBox, QFileDialog, QScrollArea
+    QHeaderView, QMessageBox, QFileDialog, QComboBox
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from ui.map_widget import MapWidget
 from ui.dialogs.open_file_dialog import open_file_dialog
 from core.reader import load_raster
-from core.analysis_water import compute_ndwi, threshold_water, predict_water_cnn
-from core.mask_tools import calculate_area
+from core.analysis_change import run_detection
+from core.change_tools import calculate_change_area, generate_change_map
 from core.exporter import export_report
+from core.models_manager import get_models_manager
 from app import AppState
 import numpy as np
 from PIL import Image
+import rasterio
+import cv2
+
+class RasterLoader(QThread):
+    """Thread for loading rasters without blocking UI."""
+    finished = pyqtSignal(object)
+    error = pyqtSignal(str)
+    
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+    
+    def run(self):
+        try:
+            data = load_raster(self.path)
+            if data:
+                self.finished.emit(data)
+            else:
+                self.error.emit("Failed to load raster")
+        except Exception as e:
+            self.error.emit(str(e))
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Geoshift Desktop (MVP)")
+        self.setWindowTitle("Geoshift Desktop - Change Detection Platform")
         self.resize(1200, 800)
         
         self.state = AppState()
+        self.models_manager = get_models_manager()
         
         # Central Widget
         central_widget = QWidget()
@@ -32,47 +55,85 @@ class MainWindow(QMainWindow):
         
         # Sidebar
         self.sidebar = QWidget()
-        self.sidebar.setFixedWidth(250)
+        self.sidebar.setFixedWidth(280)
         self.sidebar.setStyleSheet("background-color: #2c3e50; color: white;")
         sidebar_layout = QVBoxLayout(self.sidebar)
         
         # Branding
         title_label = QLabel("GEOSHIFT")
-        title_label.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 20px;")
+        title_label.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 10px;")
         title_label.setAlignment(Qt.AlignCenter)
         sidebar_layout.addWidget(title_label)
         
-        # Buttons
-        self.btn_open = self.create_button("Open Image (Single)")
-        self.btn_load_a = self.create_button("Load Image A")
-        self.btn_load_b = self.create_button("Load Image B")
-        self.btn_compare = self.create_button("Activate Compare Mode")
-        self.btn_compare.setCheckable(True)
+        subtitle_label = QLabel("Change Detection Platform")
+        subtitle_label.setStyleSheet("font-size: 12px; margin-bottom: 20px; color: #95a5a6;")
+        subtitle_label.setAlignment(Qt.AlignCenter)
+        sidebar_layout.addWidget(subtitle_label)
         
-        self.add_separator(sidebar_layout)
+        # Image Loading Section
+        section_label = QLabel("IMAGES")
+        section_label.setStyleSheet("font-size: 11px; font-weight: bold; color: #95a5a6; margin-top: 10px;")
+        sidebar_layout.addWidget(section_label)
         
-        self.btn_analyze = self.create_button("Run Water Analysis")
-        self.btn_toggle_mask = self.create_button("Toggle Mask Overlay")
-        self.btn_export = self.create_button("Export Report")
+        self.btn_load_a = self.create_button("Load Image A (Before)")
+        self.btn_load_b = self.create_button("Load Image B (After)")
         
-        sidebar_layout.addWidget(self.btn_open)
         sidebar_layout.addWidget(self.btn_load_a)
         sidebar_layout.addWidget(self.btn_load_b)
-        sidebar_layout.addWidget(self.btn_compare)
         
+        # Analysis Section
         line = QFrame()
         line.setFrameShape(QFrame.HLine)
         line.setFrameShadow(QFrame.Sunken)
-        line.setStyleSheet("background-color: #34495e; margin: 10px 0;")
+        line.setStyleSheet("background-color: #34495e; margin: 15px 0;")
         sidebar_layout.addWidget(line)
         
+        section_label2 = QLabel("ANALYSIS")
+        section_label2.setStyleSheet("font-size: 11px; font-weight: bold; color: #95a5a6;")
+        sidebar_layout.addWidget(section_label2)
+        
+        # Analysis Type Dropdown
+        type_label = QLabel("Detection Type:")
+        type_label.setStyleSheet("font-size: 12px; margin-top: 10px;")
+        sidebar_layout.addWidget(type_label)
+        
+        self.analysis_combo = QComboBox()
+        self.analysis_combo.addItem("Land-use Change", "landuse")
+        self.analysis_combo.addItem("Deforestation", "deforestation")
+        self.analysis_combo.addItem("Water Change", "water")
+        self.analysis_combo.addItem("New Structures", "structures")
+        self.analysis_combo.addItem("Disaster Damage", "disaster")
+        self.analysis_combo.setStyleSheet("""
+            QComboBox {
+                background-color: #34495e;
+                border: none;
+                padding: 8px;
+                color: white;
+                border-radius: 3px;
+            }
+            QComboBox::drop-down {
+                border: none;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #34495e;
+                color: white;
+                selection-background-color: #2980b9;
+            }
+        """)
+        self.analysis_combo.currentIndexChanged.connect(self.on_analysis_type_changed)
+        sidebar_layout.addWidget(self.analysis_combo)
+        
+        self.btn_analyze = self.create_button("Run Analysis")
+        self.btn_toggle_change = self.create_button("Toggle Change Overlay")
+        self.btn_export = self.create_button("Export Report")
+        
         sidebar_layout.addWidget(self.btn_analyze)
-        sidebar_layout.addWidget(self.btn_toggle_mask)
+        sidebar_layout.addWidget(self.btn_toggle_change)
         sidebar_layout.addWidget(self.btn_export)
         
         sidebar_layout.addStretch()
         
-        # Main Content Area (Map + Bottom Panel)
+        # Main Content Area
         content_splitter = QSplitter(Qt.Vertical)
         
         # Map
@@ -92,7 +153,7 @@ class MainWindow(QMainWindow):
         bottom_layout.addWidget(self.meta_table)
         
         # Logs/Results
-        self.log_label = QLabel("Ready.")
+        self.log_label = QLabel("Ready. Load Image A and Image B to begin.")
         self.log_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         self.log_label.setWordWrap(True)
         bottom_layout.addWidget(self.log_label)
@@ -104,12 +165,10 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(content_splitter)
         
         # Connect Signals
-        self.btn_open.clicked.connect(self.open_single_image)
-        self.btn_load_a.clicked.connect(lambda: self.load_comparison_image('A'))
-        self.btn_load_b.clicked.connect(lambda: self.load_comparison_image('B'))
-        self.btn_compare.clicked.connect(self.toggle_compare_mode)
+        self.btn_load_a.clicked.connect(lambda: self.load_image('A'))
+        self.btn_load_b.clicked.connect(lambda: self.load_image('B'))
         self.btn_analyze.clicked.connect(self.run_analysis)
-        self.btn_toggle_mask.clicked.connect(self.toggle_mask)
+        self.btn_toggle_change.clicked.connect(self.toggle_change)
         self.btn_export.clicked.connect(self.export_report)
         
         # Initial UI State
@@ -124,47 +183,40 @@ class MainWindow(QMainWindow):
                 padding: 10px;
                 text-align: left;
                 color: white;
+                border-radius: 3px;
+                margin: 2px 0;
             }
             QPushButton:hover {
                 background-color: #2980b9;
             }
-            QPushButton:checked {
-                background-color: #16a085;
+            QPushButton:disabled {
+                background-color: #2c3e50;
+                color: #7f8c8d;
             }
         """)
         return btn
-
-    def add_separator(self, layout):
-        pass # Already added manually
 
     def log(self, message):
         self.log_label.setText(message)
         print(message)
 
     def update_ui_state(self):
-        is_compare = self.state.compare_mode
-        self.btn_analyze.setEnabled(not is_compare and self.state.raster is not None)
-        self.btn_toggle_mask.setEnabled(not is_compare and self.state.mask is not None)
-        self.btn_export.setEnabled(not is_compare and self.state.results is not None)
-        
-        if is_compare:
-            self.btn_compare.setText("Deactivate Compare Mode")
-            self.btn_compare.setChecked(True)
-        else:
-            self.btn_compare.setText("Activate Compare Mode")
-            self.btn_compare.setChecked(False)
+        has_both = self.state.has_both_images()
+        self.btn_analyze.setEnabled(has_both)
+        self.btn_toggle_change.setEnabled(self.state.change_mask is not None)
+        self.btn_export.setEnabled(self.state.change_results is not None)
 
-    def update_metadata(self, data):
+    def update_metadata(self, data, slot):
+        """Update metadata table with image info."""
         self.meta_table.setRowCount(0)
         if not data:
             return
             
         items = [
-            ("File", os.path.basename(data.get('path', ''))),
+            (f"Image {slot}", os.path.basename(data.get('path', ''))),
             ("Size", f"{data['width']} x {data['height']}"),
             ("Bands", str(data['count'])),
-            ("CRS", str(data['crs'])),
-            ("Bounds", str(data['bounds']))
+            ("CRS", str(data['crs']))
         ]
         
         self.meta_table.setRowCount(len(items))
@@ -172,153 +224,148 @@ class MainWindow(QMainWindow):
             self.meta_table.setItem(i, 0, QTableWidgetItem(key))
             self.meta_table.setItem(i, 1, QTableWidgetItem(value))
 
-    def open_single_image(self):
-        path = open_file_dialog(self)
-        if path:
-            self.log(f"Loading {path}...")
-            data = load_raster(path)
-            if data:
-                self.state.reset_single_mode()
-                self.state.raster = data
-                self.state.raster_path = path
-                self.state.compare_mode = False
-                
-                self.update_metadata(data)
-                self.map_widget.show_map(data)
-                self.log(f"Loaded {os.path.basename(path)}")
-                self.update_ui_state()
-            else:
-                self.log("Failed to load raster.")
-
-    def load_comparison_image(self, slot):
+    def load_image(self, slot):
         path = open_file_dialog(self, f"Open Image {slot}")
         if path:
-            self.log(f"Loading Image {slot}: {path}...")
-            data = load_raster(path)
-            if data:
-                if slot == 'A':
-                    self.state.raster_a = data
-                else:
-                    self.state.raster_b = data
-                self.log(f"Loaded Image {slot}")
-                
-                # If compare mode is active, refresh map
-                if self.state.compare_mode:
-                    self.map_widget.show_comparison(self.state.raster_a, self.state.raster_b)
+            self.log(f"Loading Image {slot}: {os.path.basename(path)}...")
+            if slot == 'A':
+                self.btn_load_a.setEnabled(False)
             else:
-                self.log(f"Failed to load Image {slot}.")
-
-    def toggle_compare_mode(self):
-        if not self.state.compare_mode:
-            # Activate
-            if self.state.raster_a and self.state.raster_b:
-                self.state.compare_mode = True
-                self.map_widget.show_comparison(self.state.raster_a, self.state.raster_b)
-                self.log("Compare Mode Activated")
-            else:
-                QMessageBox.warning(self, "Warning", "Please load both Image A and Image B first.")
-                self.btn_compare.setChecked(False)
-                return
-        else:
-            # Deactivate
-            self.state.compare_mode = False
-            # Restore single mode view if available
-            if self.state.raster:
-                self.map_widget.show_map(self.state.raster, 
-                                         "mask.png" if self.state.mask is not None and self.state.mask_visible else None)
-            else:
-                self.map_widget.show_map(None)
-            self.log("Compare Mode Deactivated")
+                self.btn_load_b.setEnabled(False)
             
+            loader = RasterLoader(path)
+            loader.finished.connect(lambda data: self.on_raster_loaded(data, slot))
+            loader.error.connect(lambda err: self.on_raster_error(err, slot))
+            loader.start()
+            if slot == 'A':
+                self.current_loader_a = loader
+            else:
+                self.current_loader_b = loader
+    
+    def on_raster_loaded(self, data, slot):
+        """Callback when raster loading completes."""
+        if slot == 'A':
+            self.state.raster_a = data
+            self.log(f"Loaded Image A: {os.path.basename(data['path'])}")
+            self.btn_load_a.setEnabled(True)
+            self.update_metadata(data, 'A')
+        elif slot == 'B':
+            self.state.raster_b = data
+            self.log(f"Loaded Image B: {os.path.basename(data['path'])}")
+            self.btn_load_b.setEnabled(True)
+            self.update_metadata(data, 'B')
+        
+        # Show comparison if both loaded
+        if self.state.has_both_images():
+            self.refresh_comparison()
+            self.log("Both images loaded. Select analysis type and click 'Run Analysis'.")
+        
         self.update_ui_state()
+    
+    def on_raster_error(self, error, slot):
+        """Callback when raster loading fails."""
+        self.log(f"Error loading Image {slot}: {error}")
+        if slot == 'A':
+            self.btn_load_a.setEnabled(True)
+        else:
+            self.btn_load_b.setEnabled(True)
+    
+    def on_analysis_type_changed(self, index):
+        """Update selected analysis type."""
+        self.state.selected_analysis_type = self.analysis_combo.itemData(index)
+        self.log(f"Analysis type: {self.analysis_combo.currentText()}")
+    
+    def refresh_comparison(self):
+        """Refresh the comparison view."""
+        change_mask_path = "change_mask.png" if self.state.change_mask is not None and self.state.change_visible else None
+        self.map_widget.show_comparison(
+            self.state.raster_a, 
+            self.state.raster_b,
+            change_mask_path,
+            change_mask_path  # Show on both sides
+        )
 
     def run_analysis(self):
-        if not self.state.raster:
+        if not self.state.has_both_images():
             return
-            
-        self.log("Running Water Analysis...")
         
-        # Check bands
-        count = self.state.raster['count']
-        array = self.state.raster['array']
+        analysis_type = self.state.selected_analysis_type
+        self.log(f"Running {self.analysis_combo.currentText()}...")
+        self.btn_analyze.setEnabled(False)
         
-        mask = None
-        
-        # Simple heuristic: If > 3 bands, assume multispectral. 
-        # Usually Green is 3 (or 2 depending on RGB/BGR) and NIR is 8 or 4.
-        # For MVP, let's assume:
-        # 4 bands: R, G, B, NIR (common in drones/satellites) -> Green=1, NIR=3 (0-indexed)
-        # Or just try to use indices provided by user? No UI for that yet.
-        # Let's fallback to CNN if < 4 bands.
-        
-        if count >= 4:
-            try:
-                # Assuming Band 2 is Green, Band 4 is NIR (Sentinel-2 style: B3=Green, B8=NIR)
-                # But rasterio reads sequentially.
-                # Let's try: Green=1, NIR=3 (0-indexed)
-                green = array[1]
-                nir = array[3]
-                ndwi = compute_ndwi(green, nir)
-                mask = threshold_water(ndwi)
-                self.state.ndwi = ndwi
-                self.log("NDWI Analysis Complete.")
-            except Exception as e:
-                self.log(f"NDWI Error: {e}. Falling back to CNN.")
-        
-        if mask is None:
-            # Fallback to CNN or simple threshold on Blue?
-            # Let's try CNN placeholder
-            mask = predict_water_cnn(array)
-            if mask is None:
-                # Mock mask for MVP demonstration if everything fails
-                # Create a dummy mask based on simple brightness threshold on first band
-                self.log("Using brightness threshold fallback.")
-                mask = (array[0] < 50).astype(np.uint8) # Dark pixels = water?
-        
-        if mask is not None:
-            self.state.mask = mask
+        try:
+            # Read full images
+            with rasterio.open(self.state.raster_a['path']) as src_a:
+                img_a = src_a.read()
+                # Convert to HWC format for OpenCV
+                if img_a.shape[0] <= 4:  # CHW format
+                    img_a = np.transpose(img_a, (1, 2, 0))
+                if img_a.shape[2] > 3:
+                    img_a = img_a[:, :, :3]  # Take first 3 bands
             
-            # Calculate Area
-            results = calculate_area(mask, self.state.raster['transform'])
-            self.state.results = results
+            with rasterio.open(self.state.raster_b['path']) as src_b:
+                img_b = src_b.read()
+                if img_b.shape[0] <= 4:
+                    img_b = np.transpose(img_b, (1, 2, 0))
+                if img_b.shape[2] > 3:
+                    img_b = img_b[:, :, :3]
             
-            # Save mask to file for Folium overlay
-            mask_img = Image.fromarray(mask * 255, mode='L')
-            # Make transparent: 0 is transparent, 1 is blue
-            # Create RGBA
-            mask_rgba = Image.new("RGBA", mask_img.size, (0, 0, 255, 0))
-            # Paste blue where mask is 1
-            # Actually, let's just make a blue image and use mask as alpha
-            blue = Image.new("RGBA", mask_img.size, (0, 0, 255, 150)) # Semi-transparent blue
-            # We need an alpha mask where 1->255, 0->0
-            alpha = mask_img.point(lambda x: 150 if x > 0 else 0)
-            blue.putalpha(alpha)
+            # Ensure same size
+            if img_a.shape != img_b.shape:
+                img_b = cv2.resize(img_b, (img_a.shape[1], img_a.shape[0]))
             
-            mask_path = "mask.png"
-            blue.save(mask_path)
+            # Run detection
+            change_mask, stats = run_detection(img_a, img_b, analysis_type)
             
-            self.map_widget.show_map(self.state.raster, mask_path)
+            self.state.change_mask = change_mask
+            self.state.change_results = stats
             
-            # Update logs
-            self.log(f"Analysis Done. Water Area: {results['area_ha']:.2f} ha ({results['percent_coverage']:.2f}%)")
+            # Save change mask as colored overlay
+            change_colored = generate_change_map(change_mask, change_mask)
+            change_img = Image.fromarray(change_colored, mode='RGB')
+            
+            # Make semi-transparent
+            change_rgba = Image.new("RGBA", change_img.size)
+            change_rgba.paste(change_img)
+            
+            # Apply transparency where no change
+            pixels = change_rgba.load()
+            for i in range(change_rgba.size[0]):
+                for j in range(change_rgba.size[1]):
+                    if pixels[i, j][:3] == (0, 0, 0):  # No change
+                        pixels[i, j] = (0, 0, 0, 0)
+                    else:
+                        pixels[i, j] = (*pixels[i, j][:3], 180)
+            
+            change_rgba.save("change_mask.png")
+            
+            self.refresh_comparison()
+            
+            change_pct = stats.get('change_percentage', 0)
+            self.log(f"Analysis complete. Change detected: {change_pct:.2f}% of image area.")
+            
+        except Exception as e:
+            self.log(f"Analysis error: {e}")
+        finally:
+            self.btn_analyze.setEnabled(True)
             self.update_ui_state()
-        else:
-            self.log("Analysis failed to generate a mask.")
 
-    def toggle_mask(self):
-        if self.state.mask is not None:
-            self.state.mask_visible = not self.state.mask_visible
-            mask_path = "mask.png" if self.state.mask_visible else None
-            self.map_widget.show_map(self.state.raster, mask_path)
+    def toggle_change(self):
+        if self.state.change_mask is not None:
+            self.state.change_visible = not self.state.change_visible
+            self.refresh_comparison()
 
     def export_report(self):
-        if self.state.results:
-            path, _ = QFileDialog.getSaveFileName(self, "Save Report", "report.html", "HTML Files (*.html)")
+        if self.state.change_results:
+            path, _ = QFileDialog.getSaveFileName(self, "Save Report", "change_report.html", "HTML Files (*.html)")
             if path:
                 data = {
-                    **self.state.results,
-                    **self.state.raster,
-                    "preview_path": self.state.raster['preview_path']
+                    **self.state.change_results,
+                    "analysis_type": self.analysis_combo.currentText(),
+                    "image_a": os.path.basename(self.state.raster_a['path']),
+                    "image_b": os.path.basename(self.state.raster_b['path']),
+                    "preview_a": self.state.raster_a['preview_path'],
+                    "preview_b": self.state.raster_b['preview_path']
                 }
                 success = export_report(data, path)
                 if success:

@@ -10,3 +10,5 @@ matplotlib
 jinja2
 pdfkit
 pytest
+opencv-python
+scikit-image

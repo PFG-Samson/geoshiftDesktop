@@ -1,15 +1,19 @@
-# Geoshift Desktop
+# Geoshift Desktop - Change Detection Platform
 
-Geoshift Desktop is an offline geospatial intelligence tool designed for water body detection and analysis. It allows users to load large imagery (GeoTIFF, JPG, PNG), perform water body detection using NDWI or CNN models, and export detailed reports.
+Geoshift Desktop is an offline geospatial change detection platform. Load two images (before/after), run AI-powered analysis, and detect changes like deforestation, water expansion, new structures, and disaster damage.
 
 ## Features
-- **Raster Loading**: Supports GeoTIFF, JPEG, PNG.
-- **Map Display**: Interactive map using Folium and PyQtWebEngine.
-- **Water Analysis**: NDWI (Normalized Difference Water Index) calculation and optional CNN-based segmentation.
-- **Mask Visualization**: Overlay detected water bodies on the map.
-- **Area Calculation**: Calculate water area in hectares and percentage coverage.
-- **Reporting**: Export results to HTML/PDF.
-- **Imagery Comparison**: Compare two images side-by-side with a slider.
+- **Multi-Purpose Detection**: 5 analysis types
+  - Land-use Change
+  - Deforestation
+  - Water Body Expansion/Retraction
+  - New Structures
+  - Disaster Damage Assessment
+- **Offline Processing**: All analysis runs locally, no internet required
+- **Large File Support**: Handles GeoTIFFs and regular photos up to 2GB+
+- **Interactive Comparison**: Side-by-side slider view
+- **Change Visualization**: Color-coded change overlays
+- **Export Reports**: HTML reports with before/after comparisons
 
 ## Installation
 1. Clone the repository.
@@ -34,13 +38,57 @@ Run the application:
 python main.py
 ```
 
+### Workflow
+1. Click "Load Image A (Before)" to load the first image
+2. Click "Load Image B (After)" to load the second image
+3. Select analysis type from the dropdown
+4. Click "Run Analysis"
+5. View change overlay on the comparison slider
+6. Export report
+
+## Supported Formats
+- GeoTIFF (.tif, .tiff)
+- JPEG (.jpg, .jpeg)
+- PNG (.png)
+
+## Analysis Types
+
+### Land-use Change
+Detects general changes in land cover and usage patterns.
+
+### Deforestation
+Identifies areas where forest cover has been lost.
+
+### Water Change
+Detects expansion or retraction of water bodies.
+
+### New Structures
+Identifies newly constructed buildings and infrastructure.
+
+### Disaster Damage
+Assesses damage from natural disasters by comparing before/after imagery.
+
+## Technical Details
+- **Framework**: PyQt5
+- **Geospatial**: Rasterio, GDAL
+- **Image Processing**: OpenCV, NumPy
+- **Visualization**: Folium, Leaflet
+- **AI/ML**: PyTorch (models bundled)
+
 ## Packaging
 To build the executable:
 ```bash
 pyinstaller --noconfirm --onefile --add-data "models;models" --add-data "assets;assets" --add-data "ui/js;ui/js" main.py
 ```
 
-## Imagery Comparison Slider
-Geoshift Desktop supports comparing two images using a draggable slider.
-Load Image A and Image B, then activate Compare Mode. The viewer will
-display both rasters side-by-side with a vertical handle for interactive comparison.
+## Model Information
+Current implementation uses placeholder algorithms. For production:
+1. Train models on labeled datasets
+2. Export to `.pt` format
+3. Place in `models/` directory
+4. Update `model_config.json`
+
+## System Requirements
+- Python 3.10+
+- 8GB RAM minimum (16GB recommended for large files)
+- Windows/Linux/macOS

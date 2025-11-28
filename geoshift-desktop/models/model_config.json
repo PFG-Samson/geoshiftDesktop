@@ -1,0 +1,27 @@
+{
+  "landuse": {
+    "file": "landuse_segmentation.pt",
+    "input_size": [256, 256],
+    "description": "Land-use Change Detection"
+  },
+  "deforestation": {
+    "file": "deforestation_detector.pt",
+    "input_size": [256, 256],
+    "description": "Deforestation Detection"
+  },
+  "water": {
+    "file": "water_change_detector.pt",
+    "input_size": [256, 256],
+    "description": "Water Body Change"
+  },
+  "structures": {
+    "file": "structure_detector.pt",
+    "input_size": [256, 256],
+    "description": "New Structures Detection"
+  },
+  "disaster": {
+    "file": "disaster_damage_detector.pt",
+    "input_size": [256, 256],
+    "description": "Disaster Damage Assessment"
+  }
+}

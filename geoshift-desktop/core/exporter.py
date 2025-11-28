@@ -4,14 +4,14 @@ import datetime
 
 def export_report(data, output_path):
     """
-    Exports a simple HTML report.
+    Exports a simple HTML report for change detection.
     data: dict containing analysis results and metadata.
     """
     template_str = """
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Geoshift Water Analysis Report</title>
+        <title>Geoshift Change Detection Report</title>
         <style>
             body { font-family: sans-serif; margin: 20px; }
             h1 { color: #2c3e50; }
@@ -23,24 +23,26 @@ def export_report(data, output_path):
         </style>
     </head>
     <body>
-        <h1>Water Analysis Report</h1>
+        <h1>Change Detection Report</h1>
         <p><strong>Date:</strong> {{ timestamp }}</p>
-        <p><strong>File:</strong> {{ filename }}</p>
+        <p><strong>Analysis Type:</strong> {{ analysis_type }}</p>
+        
+        <h2>Images</h2>
+        <div class="metric"><span class="label">Image A (Before):</span> {{ image_a }}</div>
+        <div class="metric"><span class="label">Image B (After):</span> {{ image_b }}</div>
         
         <h2>Results</h2>
-        <div class="metric"><span class="label">Total Water Area:</span> {{ "%.2f"|format(area_ha) }} ha</div>
-        <div class="metric"><span class="label">Coverage:</span> {{ "%.2f"|format(percent_coverage) }}%</div>
-        
-        <h2>Metadata</h2>
-        <div class="metric"><span class="label">Dimensions:</span> {{ width }} x {{ height }}</div>
-        <div class="metric"><span class="label">CRS:</span> {{ crs }}</div>
+        <div class="metric"><span class="label">Change Detected:</span> {{ "%.2f"|format(change_percentage) }}%</div>
         
         <div class="images">
             <div class="img-box">
-                <h3>Original Image</h3>
-                <img src="file://{{ preview_path }}" alt="Original">
+                <h3>Before</h3>
+                <img src="file://{{ preview_a }}" alt="Before">
             </div>
-            <!-- Mask image could be added here if saved -->
+            <div class="img-box">
+                <h3>After</h3>
+                <img src="file://{{ preview_b }}" alt="After">
+            </div>
         </div>
     </body>
     </html>
@@ -50,13 +52,12 @@ def export_report(data, output_path):
         template = Template(template_str)
         html_content = template.render(
             timestamp=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            filename=os.path.basename(data.get('path', 'Unknown')),
-            area_ha=data.get('area_ha', 0),
-            percent_coverage=data.get('percent_coverage', 0),
-            width=data.get('width', 0),
-            height=data.get('height', 0),
-            crs=str(data.get('crs', 'Unknown')),
-            preview_path=data.get('preview_path', '')
+            analysis_type=data.get('analysis_type', 'Unknown'),
+            image_a=data.get('image_a', 'Unknown'),
+            image_b=data.get('image_b', 'Unknown'),
+            change_percentage=data.get('change_percentage', 0),
+            preview_a=data.get('preview_a', ''),
+            preview_b=data.get('preview_b', '')
         )
         
         with open(output_path, 'w') as f:

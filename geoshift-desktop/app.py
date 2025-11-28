@@ -1,38 +1,25 @@
 class AppState:
     def __init__(self):
-        # Single mode state
-        self.raster = None
-        self.mask = None
-        self.ndwi = None
-        self.results = None
-        self.raster_path = None
+        # Image state (always comparison mode)
+        self.raster_a = None  # Before image
+        self.raster_b = None  # After image
         
-        # Comparison mode state
-        self.raster_a = None
-        self.raster_b = None
-        self.mask_a = None
-        self.mask_b = None
-        self.results_a = None
-        self.results_b = None
-        self.compare_mode = False
-        self.active_raster = None # 'A' or 'B' or None
+        # Analysis state
+        self.selected_analysis_type = 'landuse'  # Default
+        self.change_mask = None
+        self.change_results = None
         
         # UI State
-        self.mask_visible = True
+        self.change_visible = True
 
-    def reset_single_mode(self):
-        self.raster = None
-        self.mask = None
-        self.ndwi = None
-        self.results = None
-        self.raster_path = None
-        self.mask_visible = True
-
-    def reset_compare_mode(self):
+    def reset(self):
+        """Reset all state."""
         self.raster_a = None
         self.raster_b = None
-        self.mask_a = None
-        self.mask_b = None
-        self.results_a = None
-        self.results_b = None
-        self.compare_mode = False
+        self.change_mask = None
+        self.change_results = None
+        self.change_visible = True
+    
+    def has_both_images(self) -> bool:
+        """Check if both images are loaded."""
+        return self.raster_a is not None and self.raster_b is not None
