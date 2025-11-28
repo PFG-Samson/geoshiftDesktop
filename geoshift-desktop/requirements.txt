@@ -1,0 +1,12 @@
+PyQt5
+rasterio
+numpy
+torch
+folium
+PyQtWebEngine
+shapely
+geopandas
+matplotlib
+jinja2
+pdfkit
+pytest
