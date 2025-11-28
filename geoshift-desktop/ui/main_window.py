@@ -310,9 +310,15 @@ class MainWindow(QMainWindow):
                 if img_b.shape[2] > 3:
                     img_b = img_b[:, :, :3]
             
-            # Ensure same size
-            if img_a.shape != img_b.shape:
-                img_b = cv2.resize(img_b, (img_a.shape[1], img_a.shape[0]))
+            # Ensure images are 3-channel for OpenCV processing
+            if img_a.ndim == 2:
+                img_a = cv2.cvtColor(img_a, cv2.COLOR_GRAY2RGB)
+            elif img_a.shape[2] == 1:
+                img_a = cv2.cvtColor(img_a, cv2.COLOR_GRAY2RGB)
+            if img_b.ndim == 2:
+                img_b = cv2.cvtColor(img_b, cv2.COLOR_GRAY2RGB)
+            elif img_b.shape[2] == 1:
+                img_b = cv2.cvtColor(img_b, cv2.COLOR_GRAY2RGB)
             
             # Run detection
             change_mask, stats = run_detection(img_a, img_b, analysis_type)

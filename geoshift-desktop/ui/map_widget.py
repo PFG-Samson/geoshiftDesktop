@@ -71,30 +71,17 @@ class MapWidget(QWidget):
             self.web_view.setHtml(data.getvalue().decode())
 
     def show_comparison(self, raster_a, raster_b, mask_a_path=None, mask_b_path=None):
-        """
-        Displays two rasters with a comparison slider, optionally with masks.
-        """
+        """Displays two rasters with a comparison slider, optionally with masks."""
         if not raster_a or not raster_b:
             return
-
-        # Use bounds from raster_a (assuming they match or close enough for MVP)
-        bounds = raster_a['bounds']
-        center_lat = (bounds.bottom + bounds.top) / 2
-        center_lon = (bounds.left + bounds.right) / 2
-        image_bounds = [[bounds.bottom, bounds.left], [bounds.top, bounds.right]]
-
-        m = folium.Map(location=[center_lat, center_lon], zoom_start=10)
-
-        # Create FeatureGroups for Left and Right sides
-        # Note: leaflet-side-by-side works with Layers, not FeatureGroups directly in a simple way 
-        # unless we merge the image and mask into a single layer or use a specific plugin configuration.
-        # However, the standard L.control.sideBySide takes two layers (or layer groups).
-        # Folium's LayerGroup can be passed to it? 
-        # Let's try to create a LayerGroup for A and B.
         
-        # Actually, for MVP, let's just add the mask ON TOP of the image as a separate ImageOverlay
-        # But side-by-side takes 'leftLayers' and 'rightLayers'.
-        # If we pass a LayerGroup, it should work.
+        # Use Simple CRS (pixels) to avoid projection issues
+        # Image bounds will be [[0, 0], [height, width]]
+        height = raster_a['height']
+        width = raster_a['width']
+        image_bounds = [[0, 0], [height, width]]
+        
+        m = folium.Map(location=[height/2, width/2], zoom_start=0, crs='Simple')
         
         # Left Side (Image A + Mask A)
         group_a = folium.FeatureGroup(name="Group A")
@@ -133,6 +120,7 @@ class MapWidget(QWidget):
         group_b.add_to(m)
 
         # Inject Side-by-Side JS/CSS
+        # We use the bundled files in ui/js
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         js_path = os.path.join(base_dir, 'ui', 'js', 'leaflet-side-by-side.min.js').replace('\\', '/')
         css_path = os.path.join(base_dir, 'ui', 'js', 'leaflet-side-by-side.css').replace('\\', '/')
