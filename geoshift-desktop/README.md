@@ -11,10 +11,12 @@ Geoshift Desktop is an offline geospatial change detection platform. Load two im
   - Disaster Damage Assessment
 - **Offline Processing**: All analysis runs locally, no internet required
 - **Large File Support**: Handles GeoTIFFs and regular photos up to 2GB+
-- **Interactive Comparison**: Side-by-side slider view with automatic zoom-to-extent
+- **GeoTIFF Support**: Automatic coordinate system reprojection to WGS84
+- **Interactive Comparison**: Side-by-side dual map view with synchronized panning/zooming
 - **Symbology Panel**: Adjust image visualization (Opacity, Brightness, Contrast)
 - **Change Visualization**: Color-coded change overlays with toggle control
 - **Export Reports**: HTML reports with before/after comparisons
+- **Comprehensive Logging**: File and console logging for debugging
 - **Clean UX**: Blank initial state with clear waiting indicators
 
 ## Installation
@@ -76,11 +78,46 @@ Identifies newly constructed buildings and infrastructure.
 ### Disaster Damage
 Assesses damage from natural disasters by comparing before/after imagery.
 
+## Project Structure
+```
+geoshift-desktop/
+├── engine/          # Core processing logic (formerly core/)
+│   ├── logger.py           # Centralized logging system
+│   ├── reader.py           # Raster file loading with coordinate reprojection
+│   ├── analysis_change.py  # Change detection algorithms
+│   ├── change_tools.py     # Change visualization utilities
+│   ├── exporter.py         # Report generation
+│   └── models_manager.py   # AI model management
+├── ui/              # User interface components
+│   ├── main_window.py      # Main application window
+│   ├── map_widget.py       # Folium DualMap integration
+│   ├── symbology_panel.py  # Image adjustment controls
+│   └── dialogs/            # File dialogs
+├── models/          # AI/ML models
+├── assets/          # Application assets
+├── logs/            # Application logs (auto-generated)
+└── main.py          # Application entry point
+```
+
+## Logging
+The application maintains detailed logs for debugging:
+- **Location**: `logs/geoshift_YYYYMMDD.log`
+- **Levels**: DEBUG (file), INFO (console)
+- **Contents**: Image loading, coordinate reprojection, analysis execution, errors
+
+Example log output:
+```
+2025-11-29 12:51:58 - geoshift - INFO - Loading Image A: example.tif
+2025-11-29 12:51:58 - geoshift - INFO - Original CRS: EPSG:32633
+2025-11-29 12:51:58 - geoshift - INFO - Reprojected bounds to WGS84: (6.5, 51.2, 6.6, 51.3)
+```
+
 ## Technical Details
 - **Framework**: PyQt5
-- **Geospatial**: Rasterio, GDAL
+- **Geospatial**: Rasterio, GDAL (with coordinate reprojection)
 - **Image Processing**: OpenCV, NumPy
-- **Visualization**: Folium, Leaflet
+- **Visualization**: Folium DualMap, Leaflet
+- **Logging**: Python logging module with file and console handlers
 - **AI/ML**: PyTorch (models bundled)
 
 ## Packaging
