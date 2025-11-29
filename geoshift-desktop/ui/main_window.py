@@ -8,11 +8,12 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from ui.map_widget import MapWidget
 from ui.symbology_panel import SymbologyPanel
 from ui.dialogs.open_file_dialog import open_file_dialog
-from core.reader import load_raster
-from core.analysis_change import run_detection
-from core.change_tools import calculate_change_area, generate_change_map
-from core.exporter import export_report
-from core.models_manager import get_models_manager
+from engine.reader import load_raster
+from engine.analysis_change import run_detection
+from engine.change_tools import calculate_change_area, generate_change_map
+from engine.exporter import export_report
+from engine.models_manager import get_models_manager
+from engine.logger import logger
 from app import AppState
 import numpy as np
 from PIL import Image
@@ -214,7 +215,7 @@ class MainWindow(QMainWindow):
 
     def log(self, message):
         self.log_label.setText(message)
-        print(message)
+        logger.info(message)
 
     def update_ui_state(self):
         has_both = self.state.has_both_images()
@@ -241,8 +242,10 @@ class MainWindow(QMainWindow):
             self.meta_table.setItem(i, 1, QTableWidgetItem(value))
 
     def load_image(self, slot):
+        logger.info(f"load_image called for slot {slot}")
         path = open_file_dialog(self, f"Open Image {slot}")
         if path:
+            logger.info(f"Selected file: {path}")
             self.log(f"Loading Image {slot}: {os.path.basename(path)}...")
             if slot == 'A':
                 self.btn_load_a.setEnabled(False)
@@ -260,6 +263,7 @@ class MainWindow(QMainWindow):
     
     def on_raster_loaded(self, data, slot):
         """Callback when raster loading completes."""
+        logger.info(f"Raster loaded for slot {slot}: {data.get('path', 'unknown')}")
         if slot == 'A':
             self.state.raster_a = data
             self.log(f"Loaded Image A: {os.path.basename(data['path'])}")
@@ -280,6 +284,7 @@ class MainWindow(QMainWindow):
     
     def on_raster_error(self, error, slot):
         """Callback when raster loading fails."""
+        logger.error(f"Error loading Image {slot}: {error}")
         self.log(f"Error loading Image {slot}: {error}")
         if slot == 'A':
             self.btn_load_a.setEnabled(True)
@@ -302,10 +307,13 @@ class MainWindow(QMainWindow):
         )
 
     def run_analysis(self):
+        logger.info("run_analysis called")
         if not self.state.has_both_images():
+            logger.warning("Cannot run analysis: missing images")
             return
         
         analysis_type = self.state.selected_analysis_type
+        logger.info(f"Starting analysis: {analysis_type}")
         self.log(f"Running {self.analysis_combo.currentText()}...")
         self.btn_analyze.setEnabled(False)
         
@@ -335,6 +343,21 @@ class MainWindow(QMainWindow):
                 img_b = cv2.cvtColor(img_b, cv2.COLOR_GRAY2RGB)
             elif img_b.shape[2] == 1:
                 img_b = cv2.cvtColor(img_b, cv2.COLOR_GRAY2RGB)
+            
+            # Ensure both images have the same dimensions
+            if img_a.shape[:2] != img_b.shape[:2]:
+                self.log(f"Resizing images to match dimensions...")
+                # Resize to the smaller dimensions to preserve quality
+                target_height = min(img_a.shape[0], img_b.shape[0])
+                target_width = min(img_a.shape[1], img_b.shape[1])
+                
+                if img_a.shape[:2] != (target_height, target_width):
+                    img_a = cv2.resize(img_a, (target_width, target_height), interpolation=cv2.INTER_AREA)
+                    self.log(f"Resized Image A to {target_width}x{target_height}")
+                
+                if img_b.shape[:2] != (target_height, target_width):
+                    img_b = cv2.resize(img_b, (target_width, target_height), interpolation=cv2.INTER_AREA)
+                    self.log(f"Resized Image B to {target_width}x{target_height}")
             
             # Run detection
             change_mask, stats = run_detection(img_a, img_b, analysis_type)

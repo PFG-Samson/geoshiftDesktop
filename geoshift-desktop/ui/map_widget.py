@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
 import base64
+from engine.logger import logger
 
 class MapWidget(QWidget):
     def __init__(self, parent=None):
@@ -51,17 +52,20 @@ class MapWidget(QWidget):
         </html>
         """
         self.web_view.setHtml(html)
+        logger.info("Map widget initialized with blank screen")
 
     def _get_image_url(self, path):
         """Convert local file path to base64 data URI."""
         if not path or not os.path.exists(path):
+            logger.warning(f"Image path does not exist: {path}")
             return ""
         try:
             with open(path, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+            logger.debug(f"Encoded image: {os.path.basename(path)}")
             return f"data:image/png;base64,{encoded_string}"
         except Exception as e:
-            print(f"Error encoding image {path}: {e}")
+            logger.error(f"Error encoding image {path}: {e}")
             return ""
 
     def show_map(self, raster_data, mask_path=None):
@@ -70,18 +74,9 @@ class MapWidget(QWidget):
         raster_data: dict from reader.load_raster
         mask_path: path to mask image (optional)
         """
+        logger.info("show_map called")
         if raster_data:
             bounds = raster_data['bounds']
-            # Folium expects [[lat_min, lon_min], [lat_max, lon_max]]
-            # Rasterio bounds: (left, bottom, right, top) -> (min_x, min_y, max_x, max_y)
-            # If CRS is projected, this might need reprojection to lat/lon (EPSG:4326).
-            # For MVP, assuming input might be projected, but Folium needs 4326.
-            # If we don't reproject, the map tiles won't match. 
-            # However, for simple image overlay, we can just center on the image bounds 
-            # if we disable base tiles or if the image is already 4326.
-            # Let's assume we just want to see the image.
-            
-            # Calculate center
             center_lat = (bounds.bottom + bounds.top) / 2
             center_lon = (bounds.left + bounds.right) / 2
             
@@ -110,110 +105,87 @@ class MapWidget(QWidget):
             data = io.BytesIO()
             m.save(data, close_file=False)
             self.web_view.setHtml(data.getvalue().decode())
+            logger.info("Single map view rendered successfully")
         else:
             # Empty map
             m = folium.Map(location=[0, 0], zoom_start=2)
             data = io.BytesIO()
             m.save(data, close_file=False)
             self.web_view.setHtml(data.getvalue().decode())
+            logger.info("Empty map rendered")
 
     def show_comparison(self, raster_a, raster_b, mask_a_path=None, mask_b_path=None):
-        """Displays two rasters with a comparison slider, optionally with masks."""
+        """Displays two rasters side-by-side using Folium's DualMap plugin."""
+        logger.info("show_comparison called")
+        
         if not raster_a or not raster_b:
+            logger.warning("Missing raster data for comparison")
             return
         
-        # Use Simple CRS (pixels) to avoid projection issues
-        height = raster_a['height']
-        width = raster_a['width']
-        image_bounds = [[0, 0], [height, width]]
-        
-        m = folium.Map(location=[height/2, width/2], zoom_start=0, crs='Simple', tiles=None)
-        
-        # Fit bounds to ensure images are visible
-        m.fit_bounds(image_bounds)
-        
-        # Left Side (Image A + Mask A)
-        group_a = folium.FeatureGroup(name="Group A")
-        folium.raster_layers.ImageOverlay(
-            image=self._get_image_url(raster_a['preview_path']),
-            bounds=image_bounds,
-            name="Image A"
-        ).add_to(group_a)
-        
-        if mask_a_path and os.path.exists(mask_a_path):
-            folium.raster_layers.ImageOverlay(
-                image=self._get_image_url(mask_a_path),
-                bounds=image_bounds,
-                opacity=0.6,
-                name="Mask A"
-            ).add_to(group_a)
-            
-        group_a.add_to(m)
-
-        # Right Side (Image B + Mask B)
-        group_b = folium.FeatureGroup(name="Group B")
-        folium.raster_layers.ImageOverlay(
-            image=self._get_image_url(raster_b['preview_path']),
-            bounds=image_bounds,
-            name="Image B"
-        ).add_to(group_b)
-        
-        if mask_b_path and os.path.exists(mask_b_path):
-            folium.raster_layers.ImageOverlay(
-                image=self._get_image_url(mask_b_path),
-                bounds=image_bounds,
-                opacity=0.6,
-                name="Mask B"
-            ).add_to(group_b)
-            
-        group_b.add_to(m)
-
-        # Inject Side-by-Side JS/CSS
-        # We use the bundled files in ui/js
         try:
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            js_path = os.path.join(base_dir, 'ui', 'js', 'leaflet-side-by-side.min.js')
-            css_path = os.path.join(base_dir, 'ui', 'js', 'leaflet-side-by-side.css')
-
-            if not os.path.exists(js_path):
-                print(f"Error: JS file not found at {js_path}")
-                return
-            if not os.path.exists(css_path):
-                print(f"Error: CSS file not found at {css_path}")
-                return
-
-            with open(js_path, 'r') as f:
-                js_content = f.read()
-            with open(css_path, 'r') as f:
-                css_content = f.read()
-                
-            m.get_root().header.add_child(folium.Element(f'<style>{css_content}</style>'))
-            m.get_root().header.add_child(folium.Element(f'<script>{js_content}</script>'))
+            from folium import plugins
             
-            from branca.element import MacroElement
-            from jinja2 import Template
+            # Get bounds from first image
+            bounds = raster_a['bounds']
+            center_lat = (bounds.bottom + bounds.top) / 2
+            center_lon = (bounds.left + bounds.right) / 2
+            image_bounds = [[bounds.bottom, bounds.left], [bounds.top, bounds.right]]
             
-            class SideBySide(MacroElement):
-                def __init__(self, layer_left, layer_right):
-                    super(SideBySide, self).__init__()
-                    self._template = Template("""
-                        {% macro script(this, kwargs) %}
-                        var sideBySide = L.control.sideBySide(
-                            {{ this.layer_left.get_name() }},
-                            {{ this.layer_right.get_name() }}
-                        ).addTo({{ this._parent.get_name() }});
-                        {% endmacro %}
-                    """)
-                    self.layer_left = layer_left
-                    self.layer_right = layer_right
-
-            m.add_child(SideBySide(group_a, group_b))
-
+            # Create DualMap with layout parameter
+            dual_map = plugins.DualMap(
+                location=[center_lat, center_lon],
+                zoom_start=10,
+                tiles=None,
+                layout='horizontal'
+            )
+            
+            # Add base tiles to both maps
+            folium.TileLayer('OpenStreetMap', name='Base Map').add_to(dual_map.m1)
+            folium.TileLayer('OpenStreetMap', name='Base Map').add_to(dual_map.m2)
+            
+            # Add Image A to left map (m1)
+            folium.raster_layers.ImageOverlay(
+                image=self._get_image_url(raster_a['preview_path']),
+                bounds=image_bounds,
+                opacity=1.0,
+                name="Image A"
+            ).add_to(dual_map.m1)
+            
+            if mask_a_path and os.path.exists(mask_a_path):
+                folium.raster_layers.ImageOverlay(
+                    image=self._get_image_url(mask_a_path),
+                    bounds=image_bounds,
+                    opacity=0.6,
+                    name="Mask A"
+                ).add_to(dual_map.m1)
+            
+            # Add Image B to right map (m2)
+            folium.raster_layers.ImageOverlay(
+                image=self._get_image_url(raster_b['preview_path']),
+                bounds=image_bounds,
+                opacity=1.0,
+                name="Image B"
+            ).add_to(dual_map.m2)
+            
+            if mask_b_path and os.path.exists(mask_b_path):
+                folium.raster_layers.ImageOverlay(
+                    image=self._get_image_url(mask_b_path),
+                    bounds=image_bounds,
+                    opacity=0.6,
+                    name="Mask B"
+                ).add_to(dual_map.m2)
+            
+            # Add layer controls
+            folium.LayerControl(collapsed=False).add_to(dual_map)
+            
+            # Render the dual map
+            data = io.BytesIO()
+            dual_map.save(data, close_file=False)
+            self.web_view.setHtml(data.getvalue().decode())
+            logger.info("Comparison view rendered successfully with DualMap")
+            
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            print(f"Error injecting comparison slider: {e}")
-
-        data = io.BytesIO()
-        m.save(data, close_file=False)
-        self.web_view.setHtml(data.getvalue().decode())
+            logger.error(f"Error in show_comparison: {e}", exc_info=True)
+            # Fallback to single map showing Image B
+            logger.info("Falling back to single map view")
+            self.show_map(raster_b, mask_b_path)

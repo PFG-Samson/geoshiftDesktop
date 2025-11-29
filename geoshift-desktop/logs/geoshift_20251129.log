@@ -1,0 +1,75 @@
+2025-11-29 12:51:50 - geoshift - INFO - map_widget.py:55 - Map widget initialized with blank screen
+2025-11-29 12:51:55 - geoshift - INFO - main_window.py:245 - load_image called for slot A
+2025-11-29 12:51:58 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 12:51:58 - geoshift - INFO - main_window.py:218 - Loading Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif...
+2025-11-29 12:51:58 - geoshift - INFO - main_window.py:266 - Raster loaded for slot A: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 12:51:58 - geoshift - INFO - main_window.py:218 - Loaded Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 12:51:59 - geoshift - INFO - main_window.py:245 - load_image called for slot B
+2025-11-29 12:52:00 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 12:52:00 - geoshift - INFO - main_window.py:218 - Loading Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif...
+2025-11-29 12:52:00 - geoshift - INFO - main_window.py:266 - Raster loaded for slot B: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 12:52:00 - geoshift - INFO - main_window.py:218 - Loaded Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 12:52:00 - geoshift - INFO - map_widget.py:119 - show_comparison called
+2025-11-29 12:52:00 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif.png
+2025-11-29 12:52:00 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif.png
+2025-11-29 12:52:00 - geoshift - ERROR - map_widget.py:182 - Error in show_comparison: Undefined option for argument `layout`: <folium.folium.Map object at 0x0000011C6A67FD90>. Use either 'horizontal' or 'vertical'.
+Traceback (most recent call last):
+  File "C:\Users\Samson Adeyomoye\Desktop\Desktop_Geoshift\geoshift-desktop\ui\map_widget.py", line 174, in show_comparison
+    dual_map = plugins.DualMap(m1, m2)
+  File "C:\Users\Samson Adeyomoye\AppData\Roaming\Python\Python313\site-packages\folium\plugins\dual_map.py", line 62, in __init__
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: Undefined option for argument `layout`: <folium.folium.Map object at 0x0000011C6A67FD90>. Use either 'horizontal' or 'vertical'.
+2025-11-29 12:52:00 - geoshift - INFO - map_widget.py:184 - Falling back to single map view
+2025-11-29 12:52:00 - geoshift - INFO - map_widget.py:77 - show_map called
+2025-11-29 12:52:00 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif.png
+2025-11-29 12:52:00 - geoshift - INFO - map_widget.py:108 - Single map view rendered successfully
+2025-11-29 12:52:00 - geoshift - INFO - main_window.py:218 - Both images loaded. Select analysis type and click 'Run Analysis'.
+2025-11-29 12:52:55 - geoshift - INFO - main_window.py:310 - run_analysis called
+2025-11-29 12:52:55 - geoshift - INFO - main_window.py:316 - Starting analysis: landuse
+2025-11-29 12:52:55 - geoshift - INFO - main_window.py:218 - Running Land-use Change...
+2025-11-29 12:53:20 - geoshift - INFO - main_window.py:218 - Resizing images to match dimensions...
+2025-11-29 12:53:24 - geoshift - INFO - main_window.py:218 - Resized Image A to 31956x39281
+2025-11-29 13:09:25 - geoshift - INFO - map_widget.py:55 - Map widget initialized with blank screen
+2025-11-29 13:09:28 - geoshift - INFO - main_window.py:245 - load_image called for slot A
+2025-11-29 13:09:30 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:09:30 - geoshift - INFO - main_window.py:218 - Loading Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif...
+2025-11-29 13:09:30 - geoshift - INFO - main_window.py:266 - Raster loaded for slot A: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:09:30 - geoshift - INFO - main_window.py:218 - Loaded Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:09:31 - geoshift - INFO - main_window.py:245 - load_image called for slot B
+2025-11-29 13:09:32 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:09:32 - geoshift - INFO - main_window.py:218 - Loading Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif...
+2025-11-29 13:09:32 - geoshift - INFO - main_window.py:266 - Raster loaded for slot B: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:09:32 - geoshift - INFO - main_window.py:218 - Loaded Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:09:32 - geoshift - INFO - map_widget.py:119 - show_comparison called
+2025-11-29 13:09:32 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif.png
+2025-11-29 13:09:32 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif.png
+2025-11-29 13:09:32 - geoshift - INFO - map_widget.py:185 - Comparison view rendered successfully with DualMap
+2025-11-29 13:09:32 - geoshift - INFO - main_window.py:218 - Both images loaded. Select analysis type and click 'Run Analysis'.
+2025-11-29 13:14:10 - geoshift - INFO - map_widget.py:55 - Map widget initialized with blank screen
+2025-11-29 13:14:12 - geoshift - INFO - main_window.py:245 - load_image called for slot A
+2025-11-29 13:14:15 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:14:15 - geoshift - INFO - main_window.py:218 - Loading Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif...
+2025-11-29 13:14:15 - geoshift - INFO - reader.py:24 - Loading raster: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:14:15 - geoshift - INFO - reader.py:25 - Original CRS: EPSG:32611
+2025-11-29 13:14:15 - geoshift - INFO - reader.py:26 - Original bounds: BoundingBox(left=428403.0, bottom=3867450.5, right=447166.0, top=3889719.0)
+2025-11-29 13:14:15 - geoshift - INFO - reader.py:32 - Reprojected bounds to WGS84: (-117.78601825639633, 34.94703851311185, -117.57862435836778, 35.1489840503135)
+2025-11-29 13:14:15 - geoshift - INFO - reader.py:78 - Saved preview to: C:\Users\Samson Adeyomoye\Desktop\Desktop_Geoshift\geoshift-desktop\assets\previews\preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif.png
+2025-11-29 13:14:15 - geoshift - INFO - main_window.py:266 - Raster loaded for slot A: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:14:15 - geoshift - INFO - main_window.py:218 - Loaded Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:14:16 - geoshift - INFO - main_window.py:245 - load_image called for slot B
+2025-11-29 13:14:19 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 13:14:19 - geoshift - INFO - main_window.py:218 - Loading Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif...
+2025-11-29 13:14:19 - geoshift - INFO - reader.py:24 - Loading raster: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 13:14:19 - geoshift - INFO - reader.py:25 - Original CRS: EPSG:32611
+2025-11-29 13:14:19 - geoshift - INFO - reader.py:26 - Original bounds: BoundingBox(left=430211.0, bottom=3870839.0, right=446189.0, top=3890479.5)
+2025-11-29 13:14:19 - geoshift - INFO - reader.py:32 - Reprojected bounds to WGS84: (-117.76623524792988, 34.97771776427887, -117.58954252586503, 35.15578945697758)
+2025-11-29 13:14:19 - geoshift - INFO - reader.py:78 - Saved preview to: C:\Users\Samson Adeyomoye\Desktop\Desktop_Geoshift\geoshift-desktop\assets\previews\preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif.png
+2025-11-29 13:14:19 - geoshift - INFO - main_window.py:266 - Raster loaded for slot B: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 13:14:19 - geoshift - INFO - main_window.py:218 - Loaded Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 13:14:19 - geoshift - INFO - map_widget.py:119 - show_comparison called
+2025-11-29 13:14:19 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif.png
+2025-11-29 13:14:19 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif.png
+2025-11-29 13:14:19 - geoshift - INFO - map_widget.py:185 - Comparison view rendered successfully with DualMap
+2025-11-29 13:14:19 - geoshift - INFO - main_window.py:218 - Both images loaded. Select analysis type and click 'Run Analysis'.
