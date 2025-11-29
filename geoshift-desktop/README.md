@@ -11,9 +11,11 @@ Geoshift Desktop is an offline geospatial change detection platform. Load two im
   - Disaster Damage Assessment
 - **Offline Processing**: All analysis runs locally, no internet required
 - **Large File Support**: Handles GeoTIFFs and regular photos up to 2GB+
-- **Interactive Comparison**: Side-by-side slider view
-- **Change Visualization**: Color-coded change overlays
+- **Interactive Comparison**: Side-by-side slider view with automatic zoom-to-extent
+- **Symbology Panel**: Adjust image visualization (Opacity, Brightness, Contrast)
+- **Change Visualization**: Color-coded change overlays with toggle control
 - **Export Reports**: HTML reports with before/after comparisons
+- **Clean UX**: Blank initial state with clear waiting indicators
 
 ## Installation
 1. Clone the repository.
@@ -39,12 +41,18 @@ python main.py
 ```
 
 ### Workflow
-1. Click "Load Image A (Before)" to load the first image
-2. Click "Load Image B (After)" to load the second image
-3. Select analysis type from the dropdown
-4. Click "Run Analysis"
-5. View change overlay on the comparison slider
-6. Export report
+1. **Initial State**: Application starts with a blank screen showing "Waiting for images..."
+2. Click **"Load Image A (Before)"** to load the first image
+3. Click **"Load Image B (After)"** to load the second image
+4. *(Optional)* Adjust image visualization using the **Symbology Panel**:
+   - Opacity (0-100%)
+   - Brightness (-100% to +100%)
+   - Contrast (0-200%)
+5. Select analysis type from the dropdown
+6. Click **"Run Analysis"**
+7. View change overlay on the interactive comparison slider
+8. Toggle change overlay visibility with **"Toggle Change Overlay"**
+9. Export HTML report with **"Export Report"**
 
 ## Supported Formats
 - GeoTIFF (.tif, .tiff)

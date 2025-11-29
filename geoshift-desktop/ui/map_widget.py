@@ -4,6 +4,7 @@ import folium
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
+import base64
 
 class MapWidget(QWidget):
     def __init__(self, parent=None):
@@ -14,8 +15,54 @@ class MapWidget(QWidget):
         self.web_view = QWebEngineView()
         self.layout.addWidget(self.web_view)
         
-        # Default map
-        self.show_map(None)
+        # Default: blank screen
+        self._show_blank_screen()
+
+    def _show_blank_screen(self):
+        """Display a blank white screen with a waiting message."""
+        html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background-color: #ffffff;
+                    font-family: Arial, sans-serif;
+                }
+                .message {
+                    text-align: center;
+                    color: #95a5a6;
+                    font-size: 18px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="message">
+                <p>Waiting for images...</p>
+                <p style="font-size: 14px;">Load Image A and Image B to begin</p>
+            </div>
+        </body>
+        </html>
+        """
+        self.web_view.setHtml(html)
+
+    def _get_image_url(self, path):
+        """Convert local file path to base64 data URI."""
+        if not path or not os.path.exists(path):
+            return ""
+        try:
+            with open(path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+            return f"data:image/png;base64,{encoded_string}"
+        except Exception as e:
+            print(f"Error encoding image {path}: {e}")
+            return ""
 
     def show_map(self, raster_data, mask_path=None):
         """
@@ -44,7 +91,7 @@ class MapWidget(QWidget):
             image_bounds = [[bounds.bottom, bounds.left], [bounds.top, bounds.right]]
             
             folium.raster_layers.ImageOverlay(
-                image=raster_data['preview_path'],
+                image=self._get_image_url(raster_data['preview_path']),
                 bounds=image_bounds,
                 opacity=1.0,
                 name="Imagery"
@@ -52,7 +99,7 @@ class MapWidget(QWidget):
             
             if mask_path and os.path.exists(mask_path):
                 folium.raster_layers.ImageOverlay(
-                    image=mask_path,
+                    image=self._get_image_url(mask_path),
                     bounds=image_bounds,
                     opacity=0.6,
                     name="Water Mask"
@@ -76,24 +123,26 @@ class MapWidget(QWidget):
             return
         
         # Use Simple CRS (pixels) to avoid projection issues
-        # Image bounds will be [[0, 0], [height, width]]
         height = raster_a['height']
         width = raster_a['width']
         image_bounds = [[0, 0], [height, width]]
         
-        m = folium.Map(location=[height/2, width/2], zoom_start=0, crs='Simple')
+        m = folium.Map(location=[height/2, width/2], zoom_start=0, crs='Simple', tiles=None)
+        
+        # Fit bounds to ensure images are visible
+        m.fit_bounds(image_bounds)
         
         # Left Side (Image A + Mask A)
         group_a = folium.FeatureGroup(name="Group A")
         folium.raster_layers.ImageOverlay(
-            image=raster_a['preview_path'],
+            image=self._get_image_url(raster_a['preview_path']),
             bounds=image_bounds,
             name="Image A"
         ).add_to(group_a)
         
         if mask_a_path and os.path.exists(mask_a_path):
             folium.raster_layers.ImageOverlay(
-                image=mask_a_path,
+                image=self._get_image_url(mask_a_path),
                 bounds=image_bounds,
                 opacity=0.6,
                 name="Mask A"
@@ -104,14 +153,14 @@ class MapWidget(QWidget):
         # Right Side (Image B + Mask B)
         group_b = folium.FeatureGroup(name="Group B")
         folium.raster_layers.ImageOverlay(
-            image=raster_b['preview_path'],
+            image=self._get_image_url(raster_b['preview_path']),
             bounds=image_bounds,
             name="Image B"
         ).add_to(group_b)
         
         if mask_b_path and os.path.exists(mask_b_path):
             folium.raster_layers.ImageOverlay(
-                image=mask_b_path,
+                image=self._get_image_url(mask_b_path),
                 bounds=image_bounds,
                 opacity=0.6,
                 name="Mask B"
@@ -121,18 +170,25 @@ class MapWidget(QWidget):
 
         # Inject Side-by-Side JS/CSS
         # We use the bundled files in ui/js
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        js_path = os.path.join(base_dir, 'ui', 'js', 'leaflet-side-by-side.min.js').replace('\\', '/')
-        css_path = os.path.join(base_dir, 'ui', 'js', 'leaflet-side-by-side.css').replace('\\', '/')
-
         try:
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            js_path = os.path.join(base_dir, 'ui', 'js', 'leaflet-side-by-side.min.js')
+            css_path = os.path.join(base_dir, 'ui', 'js', 'leaflet-side-by-side.css')
+
+            if not os.path.exists(js_path):
+                print(f"Error: JS file not found at {js_path}")
+                return
+            if not os.path.exists(css_path):
+                print(f"Error: CSS file not found at {css_path}")
+                return
+
             with open(js_path, 'r') as f:
                 js_content = f.read()
             with open(css_path, 'r') as f:
                 css_content = f.read()
                 
             m.get_root().header.add_child(folium.Element(f'<style>{css_content}</style>'))
-            m.get_root().script.add_child(folium.Element(f'<script>{js_content}</script>'))
+            m.get_root().header.add_child(folium.Element(f'<script>{js_content}</script>'))
             
             from branca.element import MacroElement
             from jinja2 import Template
@@ -154,6 +210,8 @@ class MapWidget(QWidget):
             m.add_child(SideBySide(group_a, group_b))
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print(f"Error injecting comparison slider: {e}")
 
         data = io.BytesIO()

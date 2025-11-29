@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from ui.map_widget import MapWidget
+from ui.symbology_panel import SymbologyPanel
 from ui.dialogs.open_file_dialog import open_file_dialog
 from core.reader import load_raster
 from core.analysis_change import run_detection
@@ -131,6 +132,16 @@ class MainWindow(QMainWindow):
         sidebar_layout.addWidget(self.btn_toggle_change)
         sidebar_layout.addWidget(self.btn_export)
         
+        # Symbology Section
+        line2 = QFrame()
+        line2.setFrameShape(QFrame.HLine)
+        line2.setFrameShadow(QFrame.Sunken)
+        line2.setStyleSheet("background-color: #34495e; margin: 15px 0;")
+        sidebar_layout.addWidget(line2)
+        
+        self.symbology_panel = SymbologyPanel()
+        sidebar_layout.addWidget(self.symbology_panel)
+        
         sidebar_layout.addStretch()
         
         # Main Content Area
@@ -170,6 +181,11 @@ class MainWindow(QMainWindow):
         self.btn_analyze.clicked.connect(self.run_analysis)
         self.btn_toggle_change.clicked.connect(self.toggle_change)
         self.btn_export.clicked.connect(self.export_report)
+        
+        # Symbology signals
+        self.symbology_panel.opacity_changed.connect(self.on_opacity_changed)
+        self.symbology_panel.brightness_changed.connect(self.on_brightness_changed)
+        self.symbology_panel.contrast_changed.connect(self.on_contrast_changed)
         
         # Initial UI State
         self.update_ui_state()
@@ -378,3 +394,19 @@ class MainWindow(QMainWindow):
                     QMessageBox.information(self, "Success", "Report exported successfully.")
                 else:
                     QMessageBox.critical(self, "Error", "Failed to export report.")
+    
+    def on_opacity_changed(self, value):
+        """Handle opacity adjustment from symbology panel."""
+        # TODO: Implement opacity adjustment on map layers
+        # For now, just log the change
+        print(f"Opacity changed to: {value}")
+    
+    def on_brightness_changed(self, value):
+        """Handle brightness adjustment from symbology panel."""
+        # TODO: Implement brightness adjustment
+        print(f"Brightness changed to: {value}")
+    
+    def on_contrast_changed(self, value):
+        """Handle contrast adjustment from symbology panel."""
+        # TODO: Implement contrast adjustment
+        print(f"Contrast changed to: {value}")
