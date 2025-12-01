@@ -73,3 +73,105 @@ ValueError: Undefined option for argument `layout`: <folium.folium.Map object at
 2025-11-29 13:14:19 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif.png
 2025-11-29 13:14:19 - geoshift - INFO - map_widget.py:185 - Comparison view rendered successfully with DualMap
 2025-11-29 13:14:19 - geoshift - INFO - main_window.py:218 - Both images loaded. Select analysis type and click 'Run Analysis'.
+2025-11-29 13:37:45 - geoshift - INFO - map_widget.py:55 - Map widget initialized with blank screen
+2025-11-29 13:37:47 - geoshift - INFO - main_window.py:245 - load_image called for slot A
+2025-11-29 13:37:50 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:37:50 - geoshift - INFO - main_window.py:218 - Loading Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif...
+2025-11-29 13:37:50 - geoshift - INFO - reader.py:24 - Loading raster: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:37:50 - geoshift - INFO - reader.py:25 - Original CRS: EPSG:32611
+2025-11-29 13:37:50 - geoshift - INFO - reader.py:26 - Original bounds: BoundingBox(left=428208.5, bottom=3867632.5, right=447058.5, top=3889829.5)
+2025-11-29 13:37:50 - geoshift - INFO - reader.py:32 - Reprojected bounds to WGS84: (-117.78816297636416, 34.94866577937897, -117.57981317181044, 35.14997474633895)
+2025-11-29 13:37:50 - geoshift - INFO - reader.py:64 - Preview data range: min=0.00, max=2198.00
+2025-11-29 13:37:50 - geoshift - INFO - reader.py:65 - Contrast stretch: 2nd percentile=0.00, 98th percentile=1555.00
+2025-11-29 13:37:50 - geoshift - INFO - reader.py:87 - Saved preview to: C:\Users\Samson Adeyomoye\Desktop\Desktop_Geoshift\geoshift-desktop\assets\previews\preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif.png
+2025-11-29 13:37:50 - geoshift - INFO - main_window.py:266 - Raster loaded for slot A: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:37:50 - geoshift - INFO - main_window.py:218 - Loaded Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:37:51 - geoshift - INFO - main_window.py:245 - load_image called for slot B
+2025-11-29 13:37:53 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 13:37:53 - geoshift - INFO - main_window.py:218 - Loading Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif...
+2025-11-29 13:37:53 - geoshift - INFO - reader.py:24 - Loading raster: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 13:37:53 - geoshift - INFO - reader.py:25 - Original CRS: EPSG:32611
+2025-11-29 13:37:53 - geoshift - INFO - reader.py:26 - Original bounds: BoundingBox(left=430211.0, bottom=3870839.0, right=446189.0, top=3890479.5)
+2025-11-29 13:37:53 - geoshift - INFO - reader.py:32 - Reprojected bounds to WGS84: (-117.76623524792988, 34.97771776427887, -117.58954252586503, 35.15578945697758)
+2025-11-29 13:37:53 - geoshift - INFO - reader.py:64 - Preview data range: min=0.00, max=2266.00
+2025-11-29 13:37:53 - geoshift - INFO - reader.py:65 - Contrast stretch: 2nd percentile=0.00, 98th percentile=1195.00
+2025-11-29 13:37:53 - geoshift - INFO - reader.py:87 - Saved preview to: C:\Users\Samson Adeyomoye\Desktop\Desktop_Geoshift\geoshift-desktop\assets\previews\preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif.png
+2025-11-29 13:37:53 - geoshift - INFO - main_window.py:266 - Raster loaded for slot B: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 13:37:53 - geoshift - INFO - main_window.py:218 - Loaded Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif
+2025-11-29 13:37:53 - geoshift - INFO - map_widget.py:119 - show_comparison called
+2025-11-29 13:37:53 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif.png
+2025-11-29 13:37:53 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN2result_cog.tif.png
+2025-11-29 13:37:53 - geoshift - INFO - map_widget.py:185 - Comparison view rendered successfully with DualMap
+2025-11-29 13:37:53 - geoshift - INFO - main_window.py:218 - Both images loaded. Select analysis type and click 'Run Analysis'.
+2025-11-29 13:55:48 - geoshift - INFO - map_widget.py:55 - Map widget initialized with blank screen
+2025-11-29 13:55:50 - geoshift - INFO - main_window.py:245 - load_image called for slot A
+2025-11-29 13:55:54 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:55:54 - geoshift - INFO - main_window.py:218 - Loading Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif...
+2025-11-29 13:55:54 - geoshift - INFO - reader.py:24 - Loading raster: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:55:54 - geoshift - INFO - reader.py:25 - Original CRS: EPSG:32611
+2025-11-29 13:55:54 - geoshift - INFO - reader.py:26 - Original bounds: BoundingBox(left=428208.5, bottom=3867632.5, right=447058.5, top=3889829.5)
+2025-11-29 13:55:54 - geoshift - INFO - reader.py:32 - Reprojected bounds to WGS84: (-117.78816297636416, 34.94866577937897, -117.57981317181044, 35.14997474633895)
+2025-11-29 13:55:54 - geoshift - INFO - reader.py:64 - Preview data range: min=0.00, max=2198.00
+2025-11-29 13:55:54 - geoshift - INFO - reader.py:65 - Contrast stretch: 2nd percentile=0.00, 98th percentile=1555.00
+2025-11-29 13:55:54 - geoshift - INFO - reader.py:74 - Preview mean value after stretch: 130.45
+2025-11-29 13:55:54 - geoshift - INFO - reader.py:94 - Converted single-band image to RGB
+2025-11-29 13:55:54 - geoshift - INFO - reader.py:102 - Saved preview to: C:\Users\Samson Adeyomoye\Desktop\Desktop_Geoshift\geoshift-desktop\assets\previews\preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif.png
+2025-11-29 13:55:54 - geoshift - INFO - main_window.py:266 - Raster loaded for slot A: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:55:54 - geoshift - INFO - main_window.py:218 - Loaded Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 13:55:55 - geoshift - INFO - main_window.py:245 - load_image called for slot B
+2025-11-29 13:55:56 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:55:56 - geoshift - INFO - main_window.py:218 - Loading Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif...
+2025-11-29 13:55:56 - geoshift - INFO - reader.py:24 - Loading raster: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:55:56 - geoshift - INFO - reader.py:25 - Original CRS: EPSG:32611
+2025-11-29 13:55:56 - geoshift - INFO - reader.py:26 - Original bounds: BoundingBox(left=428403.0, bottom=3867450.5, right=447166.0, top=3889719.0)
+2025-11-29 13:55:56 - geoshift - INFO - reader.py:32 - Reprojected bounds to WGS84: (-117.78601825639633, 34.94703851311185, -117.57862435836778, 35.1489840503135)
+2025-11-29 13:55:56 - geoshift - INFO - reader.py:64 - Preview data range: min=0.00, max=2266.00
+2025-11-29 13:55:56 - geoshift - INFO - reader.py:65 - Contrast stretch: 2nd percentile=0.00, 98th percentile=1436.00
+2025-11-29 13:55:56 - geoshift - INFO - reader.py:74 - Preview mean value after stretch: 128.95
+2025-11-29 13:55:56 - geoshift - INFO - reader.py:94 - Converted single-band image to RGB
+2025-11-29 13:55:56 - geoshift - INFO - reader.py:102 - Saved preview to: C:\Users\Samson Adeyomoye\Desktop\Desktop_Geoshift\geoshift-desktop\assets\previews\preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif.png
+2025-11-29 13:55:56 - geoshift - INFO - main_window.py:266 - Raster loaded for slot B: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:55:56 - geoshift - INFO - main_window.py:218 - Loaded Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 13:55:56 - geoshift - INFO - map_widget.py:119 - show_comparison called
+2025-11-29 13:55:56 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif.png
+2025-11-29 13:55:56 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif.png
+2025-11-29 13:55:56 - geoshift - INFO - map_widget.py:185 - Comparison view rendered successfully with DualMap
+2025-11-29 13:55:56 - geoshift - INFO - main_window.py:218 - Both images loaded. Select analysis type and click 'Run Analysis'.
+2025-11-29 14:57:38 - geoshift - INFO - map_widget.py:55 - Map widget initialized with blank screen
+2025-11-29 14:57:40 - geoshift - INFO - main_window.py:245 - load_image called for slot A
+2025-11-29 14:57:44 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 14:57:44 - geoshift - INFO - main_window.py:218 - Loading Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif...
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:24 - Loading raster: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:25 - Original CRS: EPSG:32611
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:26 - Original bounds: BoundingBox(left=428208.5, bottom=3867632.5, right=447058.5, top=3889829.5)
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:32 - Reprojected bounds to WGS84: (-117.78816297636416, 34.94866577937897, -117.57981317181044, 35.14997474633895)
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:46 - Nodata value: None
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:66 - No nodata value defined, assuming 0 is nodata
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:80 - Preview data range: min=0.00, max=2198.00
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:81 - Contrast stretch (valid pixels): 2nd percentile=844.00, 98th percentile=1660.00
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:90 - Preview mean value after stretch: 94.13
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:124 - Converted single-band image to RGBA with transparency
+2025-11-29 14:57:44 - geoshift - INFO - reader.py:132 - Saved preview to: C:\Users\Samson Adeyomoye\Desktop\Desktop_Geoshift\geoshift-desktop\assets\previews\preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif.png
+2025-11-29 14:57:44 - geoshift - INFO - main_window.py:266 - Raster loaded for slot A: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 14:57:44 - geoshift - INFO - main_window.py:218 - Loaded Image A: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif
+2025-11-29 14:57:45 - geoshift - INFO - main_window.py:245 - load_image called for slot B
+2025-11-29 14:57:46 - geoshift - INFO - main_window.py:248 - Selected file: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 14:57:46 - geoshift - INFO - main_window.py:218 - Loading Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif...
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:24 - Loading raster: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:25 - Original CRS: EPSG:32611
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:26 - Original bounds: BoundingBox(left=428403.0, bottom=3867450.5, right=447166.0, top=3889719.0)
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:32 - Reprojected bounds to WGS84: (-117.78601825639633, 34.94703851311185, -117.57862435836778, 35.1489840503135)
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:46 - Nodata value: None
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:66 - No nodata value defined, assuming 0 is nodata
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:80 - Preview data range: min=0.00, max=2266.00
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:81 - Contrast stretch (valid pixels): 2nd percentile=760.00, 98th percentile=1526.00
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:90 - Preview mean value after stretch: 95.59
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:124 - Converted single-band image to RGBA with transparency
+2025-11-29 14:57:46 - geoshift - INFO - reader.py:132 - Saved preview to: C:\Users\Samson Adeyomoye\Desktop\Desktop_Geoshift\geoshift-desktop\assets\previews\preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif.png
+2025-11-29 14:57:46 - geoshift - INFO - main_window.py:266 - Raster loaded for slot B: C:/Users/Samson Adeyomoye/Downloads/SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 14:57:46 - geoshift - INFO - main_window.py:218 - Loaded Image B: SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif
+2025-11-29 14:57:46 - geoshift - INFO - map_widget.py:119 - show_comparison called
+2025-11-29 14:57:46 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN3result_cog.tif.png
+2025-11-29 14:57:46 - geoshift - DEBUG - map_widget.py:65 - Encoded image: preview_SV2-02_20230628_L2A0000686239_0012320820001_01-PAN1result_cog.tif.png
+2025-11-29 14:57:46 - geoshift - INFO - map_widget.py:185 - Comparison view rendered successfully with DualMap
+2025-11-29 14:57:46 - geoshift - INFO - main_window.py:218 - Both images loaded. Select analysis type and click 'Run Analysis'.

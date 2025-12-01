@@ -33,20 +33,84 @@ class MapWidget(QWidget):
                     justify-content: center;
                     align-items: center;
                     height: 100vh;
-                    background-color: #ffffff;
-                    font-family: Arial, sans-serif;
+                    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    color: #2c3e50;
                 }
-                .message {
+                .container {
                     text-align: center;
-                    color: #95a5a6;
-                    font-size: 18px;
+                    background: white;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                    border: 2px dashed #bdc3c7;
+                    max-width: 400px;
+                    width: 100%;
+                }
+                .icon {
+                    font-size: 48px;
+                    color: #3498db;
+                    margin-bottom: 20px;
+                }
+                h1 {
+                    font-size: 24px;
+                    margin: 0 0 10px 0;
+                    color: #2c3e50;
+                }
+                p {
+                    font-size: 14px;
+                    color: #7f8c8d;
+                    margin: 0;
+                    line-height: 1.5;
+                }
+                .steps {
+                    margin-top: 20px;
+                    text-align: left;
+                    background: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 8px;
+                }
+                .step {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 8px;
+                    font-size: 13px;
+                }
+                .step-num {
+                    background: #3498db;
+                    color: white;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 11px;
+                    margin-right: 10px;
+                    flex-shrink: 0;
                 }
             </style>
         </head>
         <body>
-            <div class="message">
-                <p>Waiting for images...</p>
-                <p style="font-size: 14px;">Load Image A and Image B to begin</p>
+            <div class="container">
+                <div class="icon">🗺️</div>
+                <h1>Start Analysis</h1>
+                <p>Load your before and after images to begin change detection.</p>
+                
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div>Load <b>Image A</b> (Before)</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div>Load <b>Image B</b> (After)</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <div>Select <b>Analysis Type</b></div>
+                    </div>
+                </div>
             </div>
         </body>
         </html>

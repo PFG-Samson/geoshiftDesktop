@@ -43,138 +43,40 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Geoshift Desktop - Change Detection Platform")
-        self.resize(1200, 800)
+        self.resize(1280, 850)
         
         self.state = AppState()
         self.models_manager = get_models_manager()
         
-        # Central Widget
+        # Main Layout
         central_widget = QWidget()
+        central_widget.setStyleSheet("background-color: #f5f6fa;")
         self.setCentralWidget(central_widget)
-        main_layout = QHBoxLayout(central_widget)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        self.main_layout = QVBoxLayout(central_widget)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
         
-        # Sidebar
-        self.sidebar = QWidget()
-        self.sidebar.setFixedWidth(280)
-        self.sidebar.setStyleSheet("background-color: #2c3e50; color: white;")
-        sidebar_layout = QVBoxLayout(self.sidebar)
+        # 1. Top Toolbar
+        self.setup_top_toolbar()
         
-        # Branding
-        title_label = QLabel("GEOSHIFT")
-        title_label.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 10px;")
-        title_label.setAlignment(Qt.AlignCenter)
-        sidebar_layout.addWidget(title_label)
+        # Content Area (Sidebar + Map)
+        content_widget = QWidget()
+        content_layout = QHBoxLayout(content_widget)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(0)
+        self.main_layout.addWidget(content_widget)
         
-        subtitle_label = QLabel("Change Detection Platform")
-        subtitle_label.setStyleSheet("font-size: 12px; margin-bottom: 20px; color: #95a5a6;")
-        subtitle_label.setAlignment(Qt.AlignCenter)
-        sidebar_layout.addWidget(subtitle_label)
+        # 2. Sidebar
+        self.setup_sidebar()
+        content_layout.addWidget(self.sidebar)
         
-        # Image Loading Section
-        section_label = QLabel("IMAGES")
-        section_label.setStyleSheet("font-size: 11px; font-weight: bold; color: #95a5a6; margin-top: 10px;")
-        sidebar_layout.addWidget(section_label)
-        
-        self.btn_load_a = self.create_button("Load Image A (Before)")
-        self.btn_load_b = self.create_button("Load Image B (After)")
-        
-        sidebar_layout.addWidget(self.btn_load_a)
-        sidebar_layout.addWidget(self.btn_load_b)
-        
-        # Analysis Section
-        line = QFrame()
-        line.setFrameShape(QFrame.HLine)
-        line.setFrameShadow(QFrame.Sunken)
-        line.setStyleSheet("background-color: #34495e; margin: 15px 0;")
-        sidebar_layout.addWidget(line)
-        
-        section_label2 = QLabel("ANALYSIS")
-        section_label2.setStyleSheet("font-size: 11px; font-weight: bold; color: #95a5a6;")
-        sidebar_layout.addWidget(section_label2)
-        
-        # Analysis Type Dropdown
-        type_label = QLabel("Detection Type:")
-        type_label.setStyleSheet("font-size: 12px; margin-top: 10px;")
-        sidebar_layout.addWidget(type_label)
-        
-        self.analysis_combo = QComboBox()
-        self.analysis_combo.addItem("Land-use Change", "landuse")
-        self.analysis_combo.addItem("Deforestation", "deforestation")
-        self.analysis_combo.addItem("Water Change", "water")
-        self.analysis_combo.addItem("New Structures", "structures")
-        self.analysis_combo.addItem("Disaster Damage", "disaster")
-        self.analysis_combo.setStyleSheet("""
-            QComboBox {
-                background-color: #34495e;
-                border: none;
-                padding: 8px;
-                color: white;
-                border-radius: 3px;
-            }
-            QComboBox::drop-down {
-                border: none;
-            }
-            QComboBox QAbstractItemView {
-                background-color: #34495e;
-                color: white;
-                selection-background-color: #2980b9;
-            }
-        """)
-        self.analysis_combo.currentIndexChanged.connect(self.on_analysis_type_changed)
-        sidebar_layout.addWidget(self.analysis_combo)
-        
-        self.btn_analyze = self.create_button("Run Analysis")
-        self.btn_toggle_change = self.create_button("Toggle Change Overlay")
-        self.btn_export = self.create_button("Export Report")
-        
-        sidebar_layout.addWidget(self.btn_analyze)
-        sidebar_layout.addWidget(self.btn_toggle_change)
-        sidebar_layout.addWidget(self.btn_export)
-        
-        # Symbology Section
-        line2 = QFrame()
-        line2.setFrameShape(QFrame.HLine)
-        line2.setFrameShadow(QFrame.Sunken)
-        line2.setStyleSheet("background-color: #34495e; margin: 15px 0;")
-        sidebar_layout.addWidget(line2)
-        
-        self.symbology_panel = SymbologyPanel()
-        sidebar_layout.addWidget(self.symbology_panel)
-        
-        sidebar_layout.addStretch()
-        
-        # Main Content Area
-        content_splitter = QSplitter(Qt.Vertical)
-        
-        # Map
+        # 3. Map Area
         self.map_widget = MapWidget()
-        content_splitter.addWidget(self.map_widget)
+        content_layout.addWidget(self.map_widget)
         
-        # Bottom Panel
-        self.bottom_panel = QWidget()
-        self.bottom_panel.setFixedHeight(200)
-        bottom_layout = QHBoxLayout(self.bottom_panel)
-        
-        # Metadata Table
-        self.meta_table = QTableWidget()
-        self.meta_table.setColumnCount(2)
-        self.meta_table.setHorizontalHeaderLabels(["Property", "Value"])
-        self.meta_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        bottom_layout.addWidget(self.meta_table)
-        
-        # Logs/Results
-        self.log_label = QLabel("Ready. Load Image A and Image B to begin.")
-        self.log_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-        self.log_label.setWordWrap(True)
-        bottom_layout.addWidget(self.log_label)
-        
-        content_splitter.addWidget(self.bottom_panel)
-        content_splitter.setSizes([600, 200])
-        
-        main_layout.addWidget(self.sidebar)
-        main_layout.addWidget(content_splitter)
+        # 4. Bottom Panel
+        self.setup_bottom_panel()
+        self.main_layout.addWidget(self.bottom_panel)
         
         # Connect Signals
         self.btn_load_a.clicked.connect(lambda: self.load_image('A'))
@@ -191,26 +93,197 @@ class MainWindow(QMainWindow):
         # Initial UI State
         self.update_ui_state()
 
-    def create_button(self, text):
-        btn = QPushButton(text)
-        btn.setStyleSheet("""
-            QPushButton {
-                background-color: #34495e;
-                border: none;
-                padding: 10px;
-                text-align: left;
-                color: white;
-                border-radius: 3px;
-                margin: 2px 0;
+    def setup_top_toolbar(self):
+        self.top_bar = QWidget()
+        self.top_bar.setFixedHeight(60)
+        self.top_bar.setStyleSheet("""
+            background-color: #ffffff;
+            border-bottom: 1px solid #dcdde1;
+        """)
+        layout = QHBoxLayout(self.top_bar)
+        layout.setContentsMargins(20, 0, 20, 0)
+        
+        # Branding
+        brand_label = QLabel("GEOSHIFT")
+        brand_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #2c3e50;")
+        layout.addWidget(brand_label)
+        
+        subtitle = QLabel(" |  Change Detection Platform")
+        subtitle.setStyleSheet("font-size: 14px; color: #7f8c8d; margin-top: 4px;")
+        layout.addWidget(subtitle)
+        
+        layout.addStretch()
+        
+        # Placeholder Actions
+        for text in ["Settings", "Help"]:
+            btn = QPushButton(text)
+            btn.setStyleSheet("""
+                QPushButton {
+                    border: none;
+                    color: #7f8c8d;
+                    padding: 5px 10px;
+                    font-weight: 500;
+                }
+                QPushButton:hover {
+                    color: #2c3e50;
+                    background-color: #f1f2f6;
+                    border-radius: 4px;
+                }
+            """)
+            layout.addWidget(btn)
+
+        self.main_layout.addWidget(self.top_bar)
+
+    def setup_sidebar(self):
+        self.sidebar = QWidget()
+        self.sidebar.setFixedWidth(300)
+        self.sidebar.setStyleSheet("background-color: #ffffff; border-right: 1px solid #dcdde1;")
+        layout = QVBoxLayout(self.sidebar)
+        layout.setContentsMargins(15, 20, 15, 20)
+        layout.setSpacing(20)
+        
+        # Section 1: Images
+        self.btn_load_a = self.create_button("Load Image A (Before)", "primary")
+        self.btn_load_b = self.create_button("Load Image B (After)", "primary")
+        
+        images_layout = QVBoxLayout()
+        images_layout.addWidget(self.btn_load_a)
+        images_layout.addWidget(self.btn_load_b)
+        self.create_sidebar_section(layout, "IMAGES", images_layout)
+        
+        # Section 2: Analysis
+        analysis_layout = QVBoxLayout()
+        
+        type_label = QLabel("Detection Type")
+        type_label.setStyleSheet("color: #7f8c8d; font-size: 11px; font-weight: 600; margin-bottom: 5px;")
+        analysis_layout.addWidget(type_label)
+        
+        self.analysis_combo = QComboBox()
+        self.analysis_combo.addItems(["Land-use Change", "Deforestation", "Water Change", "New Structures", "Disaster Damage"])
+        # Map friendly names to internal keys
+        self.analysis_combo.setItemData(0, "landuse")
+        self.analysis_combo.setItemData(1, "deforestation")
+        self.analysis_combo.setItemData(2, "water")
+        self.analysis_combo.setItemData(3, "structures")
+        self.analysis_combo.setItemData(4, "disaster")
+        
+        self.analysis_combo.setStyleSheet("""
+            QComboBox {
+                padding: 8px;
+                border: 1px solid #dcdde1;
+                border-radius: 4px;
+                background: #f8f9fa;
+                color: #2c3e50;
             }
-            QPushButton:hover {
-                background-color: #2980b9;
-            }
-            QPushButton:disabled {
-                background-color: #2c3e50;
-                color: #7f8c8d;
+            QComboBox::drop-down { border: none; }
+        """)
+        self.analysis_combo.currentIndexChanged.connect(self.on_analysis_type_changed)
+        analysis_layout.addWidget(self.analysis_combo)
+        
+        self.btn_analyze = self.create_button("Run Analysis", "action")
+        self.btn_toggle_change = self.create_button("Toggle Overlay", "secondary")
+        self.btn_export = self.create_button("Export Report", "secondary")
+        
+        analysis_layout.addSpacing(10)
+        analysis_layout.addWidget(self.btn_analyze)
+        analysis_layout.addWidget(self.btn_toggle_change)
+        analysis_layout.addWidget(self.btn_export)
+        
+        self.create_sidebar_section(layout, "ANALYSIS", analysis_layout)
+        
+        # Section 3: Symbology
+        self.symbology_panel = SymbologyPanel()
+        # Wrap symbology panel in a layout to pass to create_sidebar_section
+        sym_layout = QVBoxLayout()
+        sym_layout.addWidget(self.symbology_panel)
+        self.create_sidebar_section(layout, "SYMBOLOGY", sym_layout)
+        
+        layout.addStretch()
+
+    def create_sidebar_section(self, parent_layout, title, content_layout):
+        frame = QFrame()
+        frame.setStyleSheet("""
+            QFrame {
+                background-color: #ffffff;
+                border: 1px solid #e1e4e8;
+                border-radius: 8px;
             }
         """)
+        frame_layout = QVBoxLayout(frame)
+        frame_layout.setContentsMargins(15, 15, 15, 15)
+        
+        header = QLabel(title)
+        header.setStyleSheet("color: #95a5a6; font-size: 11px; font-weight: bold; letter-spacing: 1px; border: none;")
+        frame_layout.addWidget(header)
+        frame_layout.addSpacing(5)
+        
+        frame_layout.addLayout(content_layout)
+        parent_layout.addWidget(frame)
+
+    def setup_bottom_panel(self):
+        self.bottom_panel = QWidget()
+        self.bottom_panel.setFixedHeight(40)
+        self.bottom_panel.setStyleSheet("background-color: #2c3e50; color: white;")
+        layout = QHBoxLayout(self.bottom_panel)
+        layout.setContentsMargins(15, 0, 15, 0)
+        
+        self.log_label = QLabel("Ready")
+        self.log_label.setStyleSheet("font-weight: 500;")
+        layout.addWidget(self.log_label)
+        
+        layout.addStretch()
+        
+        # Compact Metadata
+        self.meta_label = QLabel("")
+        self.meta_label.setStyleSheet("color: #bdc3c7; font-size: 12px;")
+        layout.addWidget(self.meta_label)
+
+    def create_button(self, text, style="secondary"):
+        btn = QPushButton(text)
+        
+        base_style = """
+            QPushButton {
+                padding: 10px;
+                border-radius: 4px;
+                font-weight: 500;
+                text-align: center;
+            }
+        """
+        
+        if style == "primary":
+            color_style = """
+                QPushButton {
+                    background-color: #ecf0f1;
+                    color: #2c3e50;
+                    border: 1px solid #bdc3c7;
+                    text-align: left;
+                }
+                QPushButton:hover { background-color: #dfe6e9; }
+                QPushButton:disabled { color: #bdc3c7; }
+            """
+        elif style == "action":
+            color_style = """
+                QPushButton {
+                    background-color: #3498db;
+                    color: white;
+                    border: none;
+                    font-weight: bold;
+                }
+                QPushButton:hover { background-color: #2980b9; }
+                QPushButton:disabled { background-color: #95a5a6; }
+            """
+        else: # secondary
+            color_style = """
+                QPushButton {
+                    background-color: transparent;
+                    color: #2c3e50;
+                    border: 1px solid #bdc3c7;
+                }
+                QPushButton:hover { background-color: #f5f6fa; }
+                QPushButton:disabled { color: #bdc3c7; border-color: #ecf0f1; }
+            """
+            
+        btn.setStyleSheet(base_style + color_style)
         return btn
 
     def log(self, message):
@@ -224,22 +297,21 @@ class MainWindow(QMainWindow):
         self.btn_export.setEnabled(self.state.change_results is not None)
 
     def update_metadata(self, data, slot):
-        """Update metadata table with image info."""
-        self.meta_table.setRowCount(0)
+        """Update compact metadata label."""
         if not data:
             return
-            
-        items = [
-            (f"Image {slot}", os.path.basename(data.get('path', ''))),
-            ("Size", f"{data['width']} x {data['height']}"),
-            ("Bands", str(data['count'])),
-            ("CRS", str(data['crs']))
-        ]
         
-        self.meta_table.setRowCount(len(items))
-        for i, (key, value) in enumerate(items):
-            self.meta_table.setItem(i, 0, QTableWidgetItem(key))
-            self.meta_table.setItem(i, 1, QTableWidgetItem(value))
+        filename = os.path.basename(data.get('path', ''))
+        dims = f"{data['width']}x{data['height']}"
+        crs = str(data['crs'])
+        
+        current_text = self.meta_label.text()
+        new_info = f"Img {slot}: {filename} ({dims}, {crs})"
+        
+        if current_text:
+            self.meta_label.setText(f"{current_text}  |  {new_info}")
+        else:
+            self.meta_label.setText(new_info)
 
     def load_image(self, slot):
         logger.info(f"load_image called for slot {slot}")
@@ -279,6 +351,9 @@ class MainWindow(QMainWindow):
         if self.state.has_both_images():
             self.refresh_comparison()
             self.log("Both images loaded. Select analysis type and click 'Run Analysis'.")
+        else:
+            # Show single image
+            self.map_widget.show_map(data)
         
         self.update_ui_state()
     
