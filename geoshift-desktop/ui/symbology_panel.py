@@ -27,7 +27,7 @@ class SymbologyPanel(QWidget):
                 border-radius: 5px;
                 margin-top: 10px;
                 padding-top: 10px;
-                color: white;
+                color: #2c3e50;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
@@ -39,7 +39,7 @@ class SymbologyPanel(QWidget):
         
         # Opacity slider
         opacity_label = QLabel("Opacity: 100%")
-        opacity_label.setStyleSheet("color: white; font-weight: normal;")
+        opacity_label.setStyleSheet(" color: #2c3e50;")
         self.opacity_slider = QSlider(Qt.Horizontal)
         self.opacity_slider.setMinimum(0)
         self.opacity_slider.setMaximum(100)
@@ -54,7 +54,7 @@ class SymbologyPanel(QWidget):
         
         # Brightness slider
         brightness_label = QLabel("Brightness: 0%")
-        brightness_label.setStyleSheet("color: white; font-weight: normal;")
+        brightness_label.setStyleSheet(" color: #2c3e50;")
         self.brightness_slider = QSlider(Qt.Horizontal)
         self.brightness_slider.setMinimum(-100)
         self.brightness_slider.setMaximum(100)
@@ -69,7 +69,7 @@ class SymbologyPanel(QWidget):
         
         # Contrast slider
         contrast_label = QLabel("Contrast: 100%")
-        contrast_label.setStyleSheet("color: white; font-weight: normal;")
+        contrast_label.setStyleSheet(" color: #2c3e50;")
         self.contrast_slider = QSlider(Qt.Horizontal)
         self.contrast_slider.setMinimum(0)
         self.contrast_slider.setMaximum(200)

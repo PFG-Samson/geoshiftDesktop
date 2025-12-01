@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from ui.map_widget import MapWidget
 from ui.symbology_panel import SymbologyPanel
+from ui.layer_panel import LayerPanel
 from ui.dialogs.open_file_dialog import open_file_dialog
 from engine.reader import load_raster
 from engine.analysis_change import run_detection
@@ -66,13 +67,17 @@ class MainWindow(QMainWindow):
         content_layout.setSpacing(0)
         self.main_layout.addWidget(content_widget)
         
-        # 2. Sidebar
+        # 2. Left Sidebar (Tools & Symbology)
         self.setup_sidebar()
         content_layout.addWidget(self.sidebar)
         
-        # 3. Map Area
+        # 3. Map Area (Center)
         self.map_widget = MapWidget()
-        content_layout.addWidget(self.map_widget)
+        content_layout.addWidget(self.map_widget, stretch=1)
+        
+        # 4. Right Sidebar (Layers)
+        self.setup_layer_panel()
+        content_layout.addWidget(self.layer_panel)
         
         # 4. Bottom Panel
         self.setup_bottom_panel()
@@ -89,6 +94,11 @@ class MainWindow(QMainWindow):
         self.symbology_panel.opacity_changed.connect(self.on_opacity_changed)
         self.symbology_panel.brightness_changed.connect(self.on_brightness_changed)
         self.symbology_panel.contrast_changed.connect(self.on_contrast_changed)
+        
+        # Layer Panel signals
+        self.layer_panel.visibility_changed.connect(self.map_widget.toggle_layer_visibility)
+        self.layer_panel.layer_removed.connect(self.map_widget.remove_layer)
+        self.layer_panel.layer_selected.connect(self.on_layer_selected)
         
         # Initial UI State
         self.update_ui_state()
@@ -114,23 +124,48 @@ class MainWindow(QMainWindow):
         
         layout.addStretch()
         
-        # Placeholder Actions
-        for text in ["Settings", "Help"]:
-            btn = QPushButton(text)
-            btn.setStyleSheet("""
-                QPushButton {
-                    border: none;
-                    color: #7f8c8d;
-                    padding: 5px 10px;
-                    font-weight: 500;
-                }
-                QPushButton:hover {
-                    color: #2c3e50;
-                    background-color: #f1f2f6;
-                    border-radius: 4px;
-                }
-            """)
-            layout.addWidget(btn)
+        # Toolbar Actions
+        btn_load_a = QPushButton("📂 Load A")
+        btn_load_a.clicked.connect(lambda: self.load_image('A'))
+        self._style_toolbar_btn(btn_load_a)
+        layout.addWidget(btn_load_a)
+
+        btn_load_b = QPushButton("📂 Load B")
+        btn_load_b.clicked.connect(lambda: self.load_image('B'))
+        self._style_toolbar_btn(btn_load_b)
+        layout.addWidget(btn_load_b)
+
+        btn_swap = QPushButton("🔄 Swap")
+        btn_swap.clicked.connect(self.swap_layers)
+        self._style_toolbar_btn(btn_swap)
+        layout.addWidget(btn_swap)
+
+        btn_clear = QPushButton("🗑️ Clear All")
+        btn_clear.clicked.connect(self.clear_all_layers)
+        self._style_toolbar_btn(btn_clear)
+        layout.addWidget(btn_clear)
+
+        layout.addStretch()
+
+    def _style_toolbar_btn(self, btn):
+        btn.setStyleSheet("""
+            QPushButton {
+                border: none;
+                color: #57606f;
+                padding: 6px 12px;
+                font-weight: 600;
+                background: #f1f2f6;
+                border-radius: 4px;
+                margin-right: 8px;
+            }
+            QPushButton:hover {
+                color: #2f3542;
+                background-color: #dfe4ea;
+            }
+        """)
+
+    def setup_layer_panel(self):
+        self.layer_panel = LayerPanel(self.map_widget)
 
         self.main_layout.addWidget(self.top_bar)
 
@@ -355,6 +390,7 @@ class MainWindow(QMainWindow):
             # Show single image
             self.map_widget.show_map(data)
         
+        self.layer_panel.refresh()
         self.update_ui_state()
     
     def on_raster_error(self, error, slot):
@@ -380,6 +416,7 @@ class MainWindow(QMainWindow):
             change_mask_path,
             change_mask_path  # Show on both sides
         )
+        self.layer_panel.refresh()
 
     def run_analysis(self):
         logger.info("run_analysis called")
@@ -495,16 +532,48 @@ class MainWindow(QMainWindow):
     
     def on_opacity_changed(self, value):
         """Handle opacity adjustment from symbology panel."""
-        # TODO: Implement opacity adjustment on map layers
-        # For now, just log the change
-        print(f"Opacity changed to: {value}")
+        # Update currently selected layer if any
+        if hasattr(self, 'selected_layer') and self.selected_layer:
+            # We need to update the layer in map_widget
+            # But map_widget.layers stores info. We need a method to update opacity.
+            # For now, let's just re-add the layer with new opacity or update the dict and re-render
+            if self.selected_layer in self.map_widget.layers:
+                self.map_widget.layers[self.selected_layer]['opacity'] = value
+                self.map_widget._render_map()
     
     def on_brightness_changed(self, value):
         """Handle brightness adjustment from symbology panel."""
-        # TODO: Implement brightness adjustment
-        print(f"Brightness changed to: {value}")
+        # TODO: Implement brightness adjustment (requires raster processing or CSS filter)
+        pass
     
     def on_contrast_changed(self, value):
         """Handle contrast adjustment from symbology panel."""
         # TODO: Implement contrast adjustment
-        print(f"Contrast changed to: {value}")
+        pass
+
+    def on_layer_selected(self, name):
+        """Handle layer selection from LayerPanel."""
+        self.selected_layer = name
+        # Update symbology panel to reflect this layer's settings if we stored them
+        # For now, just reset or keep current
+        self.log(f"Selected layer: {name}")
+
+    def swap_layers(self):
+        """Swap Image A and Image B."""
+        if self.state.has_both_images():
+            self.state.raster_a, self.state.raster_b = self.state.raster_b, self.state.raster_a
+            self.refresh_comparison()
+            self.log("Swapped Image A and Image B")
+            # Update metadata labels
+            self.update_metadata(self.state.raster_a, 'A')
+            self.update_metadata(self.state.raster_b, 'B')
+
+    def clear_all_layers(self):
+        self.map_widget.clear_all_layers()
+        self.layer_panel.refresh()
+        self.state.raster_a = None
+        self.state.raster_b = None
+        self.btn_load_a.setEnabled(True)
+        self.btn_load_b.setEnabled(True)
+        self.meta_label.setText("")
+        self.log("Cleared all layers")
