@@ -72,8 +72,31 @@ class MainWindow(QMainWindow):
         content_layout.addWidget(self.sidebar)
         
         # 3. Map Area (Center)
+        map_container = QWidget()
+        map_container_layout = QVBoxLayout(map_container)
+        map_container_layout.setContentsMargins(0, 0, 0, 0)
+        map_container_layout.setSpacing(0)
+        
+        # Comparison mode indicator (initially hidden)
+        self.comparison_indicator = QLabel("💡 Drag the slider to compare images side-by-side")
+        self.comparison_indicator.setStyleSheet("""
+            QLabel {
+                background-color: #3498db;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: 500;
+                font-size: 13px;
+            }
+        """)
+        self.comparison_indicator.setAlignment(Qt.AlignCenter)
+        self.comparison_indicator.hide()  # Hidden by default
+        
+        map_container_layout.addWidget(self.comparison_indicator)
         self.map_widget = MapWidget()
-        content_layout.addWidget(self.map_widget, stretch=1)
+        map_container_layout.addWidget(self.map_widget, stretch=1)
+        
+        content_layout.addWidget(map_container, stretch=1)
         
         # 4. Right Sidebar (Layers)
         self.setup_layer_panel()
@@ -125,27 +148,24 @@ class MainWindow(QMainWindow):
         layout.addStretch()
         
         # Toolbar Actions
-        btn_load_a = QPushButton("📂 Load A")
-        btn_load_a.clicked.connect(lambda: self.load_image('A'))
-        self._style_toolbar_btn(btn_load_a)
-        layout.addWidget(btn_load_a)
-
-        btn_load_b = QPushButton("📂 Load B")
-        btn_load_b.clicked.connect(lambda: self.load_image('B'))
-        self._style_toolbar_btn(btn_load_b)
-        layout.addWidget(btn_load_b)
-
+        # User requested to remove Load A/B from here to avoid duplication with sidebar
+        
         btn_swap = QPushButton("🔄 Swap")
+        btn_swap.setToolTip("Swap Image A and Image B positions in the comparison view (left ↔ right).")
         btn_swap.clicked.connect(self.swap_layers)
         self._style_toolbar_btn(btn_swap)
         layout.addWidget(btn_swap)
 
         btn_clear = QPushButton("🗑️ Clear All")
+        btn_clear.setToolTip("Remove all loaded images and reset the application to its initial state.")
         btn_clear.clicked.connect(self.clear_all_layers)
         self._style_toolbar_btn(btn_clear)
         layout.addWidget(btn_clear)
 
         layout.addStretch()
+        
+        # Add to main layout immediately to ensure it's at the top
+        self.main_layout.addWidget(self.top_bar)
 
     def _style_toolbar_btn(self, btn):
         btn.setStyleSheet("""
@@ -167,8 +187,6 @@ class MainWindow(QMainWindow):
     def setup_layer_panel(self):
         self.layer_panel = LayerPanel(self.map_widget)
 
-        self.main_layout.addWidget(self.top_bar)
-
     def setup_sidebar(self):
         self.sidebar = QWidget()
         self.sidebar.setFixedWidth(300)
@@ -179,7 +197,9 @@ class MainWindow(QMainWindow):
         
         # Section 1: Images
         self.btn_load_a = self.create_button("Load Image A (Before)", "primary")
+        self.btn_load_a.setToolTip("Load the 'before' image for comparison. Supports GeoTIFF, PNG, JPEG formats.")
         self.btn_load_b = self.create_button("Load Image B (After)", "primary")
+        self.btn_load_b.setToolTip("Load the 'after' image for comparison. Images will be displayed side-by-side with an interactive slider.")
         
         images_layout = QVBoxLayout()
         images_layout.addWidget(self.btn_load_a)
@@ -212,12 +232,16 @@ class MainWindow(QMainWindow):
             }
             QComboBox::drop-down { border: none; }
         """)
+        self.analysis_combo.setToolTip("Select the type of change detection analysis to perform on the loaded images.")
         self.analysis_combo.currentIndexChanged.connect(self.on_analysis_type_changed)
         analysis_layout.addWidget(self.analysis_combo)
         
         self.btn_analyze = self.create_button("Run Analysis", "action")
+        self.btn_analyze.setToolTip("Run change detection analysis on both loaded images. Results will be displayed as a colored overlay.")
         self.btn_toggle_change = self.create_button("Toggle Overlay", "secondary")
+        self.btn_toggle_change.setToolTip("Show or hide the change detection overlay on the comparison view.")
         self.btn_export = self.create_button("Export Report", "secondary")
+        self.btn_export.setToolTip("Export analysis results as an HTML report with statistics and visualizations.")
         
         analysis_layout.addSpacing(10)
         analysis_layout.addWidget(self.btn_analyze)
@@ -386,9 +410,13 @@ class MainWindow(QMainWindow):
         if self.state.has_both_images():
             self.refresh_comparison()
             self.log("Both images loaded. Select analysis type and click 'Run Analysis'.")
+            # Show comparison mode indicator
+            self.comparison_indicator.show()
         else:
             # Show single image
             self.map_widget.show_map(data)
+            # Hide comparison indicator
+            self.comparison_indicator.hide()
         
         self.layer_panel.refresh()
         self.update_ui_state()
@@ -576,4 +604,5 @@ class MainWindow(QMainWindow):
         self.btn_load_a.setEnabled(True)
         self.btn_load_b.setEnabled(True)
         self.meta_label.setText("")
+        self.comparison_indicator.hide()  # Hide indicator when clearing
         self.log("Cleared all layers")

@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QListWidget, QListWidgetItem, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QListWidget, QListWidgetItem, QHBoxLayout, QPushButton, QLabel
 from PyQt5.QtCore import pyqtSignal, Qt
 
 class LayerPanel(QWidget):
@@ -18,6 +18,12 @@ class LayerPanel(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(5, 5, 5, 5)
         layout.setSpacing(5)
+        
+        # Header
+        header = QLabel("LAYERS")
+        header.setStyleSheet("font-weight: bold; color: #95a5a6; font-size: 12px; letter-spacing: 1px; margin-bottom: 5px;")
+        layout.addWidget(header)
+        
         self.list = QListWidget()
         self.list.itemChanged.connect(self._on_item_changed)
         self.list.itemDoubleClicked.connect(self._on_item_double_clicked)

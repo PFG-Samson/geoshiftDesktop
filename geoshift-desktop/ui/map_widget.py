@@ -260,7 +260,17 @@ class MapWidget(QWidget):
             self._show_blank_screen()
 
     def show_comparison(self, raster_a, raster_b, mask_a_path=None, mask_b_path=None):
-        """Display two rasters side‑by‑side using the layer management system."""
+        """Display two rasters side‑by‑side using Folium's SideBySideLayers plugin.
+        
+        This method:
+        1. Validates input rasters
+        2. Clears existing layers
+        3. Adds both rasters as separate image layers
+        4. Sets comparison_mode flag to True
+        5. Renders the map with SideBySideLayers plugin (handled in _render_map)
+        
+        The interactive slider is automatically added by _render_map when comparison_mode is True.
+        """
         logger.info("show_comparison called")
         if not raster_a or not raster_b:
             logger.warning("Missing raster data for comparison")
@@ -274,4 +284,3 @@ class MapWidget(QWidget):
         
         self.comparison_mode = True
         self._render_map()
-        # Future: integrate a Leaflet side‑by‑side plugin for interactive slider
