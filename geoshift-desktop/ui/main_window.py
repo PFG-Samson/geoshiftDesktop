@@ -592,7 +592,8 @@ class MainWindow(QMainWindow):
             self.state.raster_a, self.state.raster_b = self.state.raster_b, self.state.raster_a
             self.refresh_comparison()
             self.log("Swapped Image A and Image B")
-            # Update metadata labels
+            # Clear and rebuild metadata labels to avoid duplication
+            self.meta_label.setText("")
             self.update_metadata(self.state.raster_a, 'A')
             self.update_metadata(self.state.raster_b, 'B')
 
