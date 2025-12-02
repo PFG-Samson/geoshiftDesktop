@@ -5,7 +5,24 @@ from PyQt5.QtWidgets import (
     QHeaderView, QMessageBox, QFileDialog, QComboBox
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from ui.map_widget import MapWidget
+
+# FEATURE FLAG: Toggle between Folium and PyQtGraph
+# Set to True to use new PyQtGraph widget (requires: pip install pyqtgraph PyOpenGL)
+# Set to False to use legacy Folium widget
+USE_PYQTGRAPH = False  # Will be enabled after dependencies are installed
+
+if USE_PYQTGRAPH:
+    try:
+        from ui.pyqtgraph_map_widget import PyQtGraphMapWidget
+        from ui.comparison_widget import ComparisonWidget
+        logger.info("Using PyQtGraph map widget")
+    except ImportError as e:
+        logger.warning(f"PyQtGraph not available, falling back to Folium: {e}")
+        USE_PYQTGRAPH = False
+        from ui.map_widget import MapWidget
+else:
+    from ui.map_widget import MapWidget
+    
 from ui.symbology_panel import SymbologyPanel
 from ui.layer_panel import LayerPanel
 from ui.dialogs.open_file_dialog import open_file_dialog
@@ -93,8 +110,23 @@ class MainWindow(QMainWindow):
         self.comparison_indicator.hide()  # Hidden by default
         
         map_container_layout.addWidget(self.comparison_indicator)
-        self.map_widget = MapWidget()
-        map_container_layout.addWidget(self.map_widget, stretch=1)
+        
+        # Initialize map widget based on feature flag
+        if USE_PYQTGRAPH:
+            # Use PyQtGraph-based widget for better performance
+            self.map_widget = PyQtGraphMapWidget()
+            self.comparison_widget = ComparisonWidget()
+            self.comparison_widget.hide()  # Hidden until comparison mode
+            map_container_layout.addWidget(self.map_widget, stretch=1)
+            map_container_layout.addWidget(self.comparison_widget, stretch=1)
+            self.using_pyqtgraph = True
+            logger.info("Initialized PyQtGraph map widget")
+        else:
+            # Use legacy Folium widget
+            self.map_widget = MapWidget()
+            map_container_layout.addWidget(self.map_widget, stretch=1)
+            self.using_pyqtgraph = False
+            logger.info("Initialized Folium map widget")
         
         content_layout.addWidget(map_container, stretch=1)
         
@@ -437,13 +469,23 @@ class MainWindow(QMainWindow):
     
     def refresh_comparison(self):
         """Refresh the comparison view."""
-        change_mask_path = "change_mask.png" if self.state.change_mask is not None and self.state.change_visible else None
-        self.map_widget.show_comparison(
-            self.state.raster_a, 
-            self.state.raster_b,
-            change_mask_path,
-            change_mask_path  # Show on both sides
-        )
+        if self.using_pyqtgraph:
+            # PyQtGraph comparison mode
+            self.map_widget.hide()
+            self.comparison_widget.show()
+            self.comparison_widget.show_comparison(
+                self.state.raster_a,
+                self.state.raster_b
+            )
+        else:
+            # Folium comparison mode
+            change_mask_path = "change_mask.png" if self.state.change_mask is not None and self.state.change_visible else None
+            self.map_widget.show_comparison(
+                self.state.raster_a, 
+                self.state.raster_b,
+                change_mask_path,
+                change_mask_path  # Show on both sides
+            )
         self.layer_panel.refresh()
 
     def run_analysis(self):

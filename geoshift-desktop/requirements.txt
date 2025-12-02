@@ -12,3 +12,7 @@ pdfkit
 pytest
 opencv-python
 scikit-image
+pyqtgraph>=0.13.0
+PyOpenGL>=3.1.0
+PyOpenGL-accelerate>=3.1.0
+
