@@ -153,10 +153,11 @@ class MapWidget(QWidget):
         else:
             logger.warning(f"Attempted to remove non‑existent layer: {name}")
 
-    def clear_all_layers(self):
-        """Remove all image layers and reset to blank map."""
+    def clear_all_layers(self, show_blank=True):
+        """Remove all image layers and optionally reset to blank map."""
         self.layers.clear()
-        self._show_blank_screen()
+        if show_blank:
+            self._show_blank_screen()
 
     def toggle_layer_visibility(self, name, visible):
         """Toggle visibility of a layer and re‑render the map."""
@@ -222,12 +223,19 @@ class MapWidget(QWidget):
         if self.comparison_mode and len(layer_objects) >= 2:
             # Assume first two keys are the ones to compare (usually Image A and Image B)
             keys = list(layer_objects.keys())
+            logger.info(f"Comparison mode active. Layer keys: {keys}")
             # Try to find 'Image A' and 'Image B' specifically
             left_layer = layer_objects.get('Image A') or layer_objects[keys[0]]
             right_layer = layer_objects.get('Image B') or layer_objects[keys[1]]
             
             if left_layer and right_layer:
+                logger.info("Adding SideBySide slider plugin")
                 plugins.SideBySideLayers(layer_left=left_layer, layer_right=right_layer).add_to(m)
+            else:
+                logger.warning(f"Could not create slider: left_layer={left_layer}, right_layer={right_layer}")
+        else:
+            logger.info(f"Slider not added: comparison_mode={self.comparison_mode}, layer_count={len(layer_objects)}")
+
 
         folium.LayerControl(collapsed=False).add_to(m)
         data = io.BytesIO()
@@ -240,9 +248,43 @@ class MapWidget(QWidget):
             L.ImageOverlay.prototype.getContainer = function() { return this.getElement(); };
         </script>
         """
+        
+        # Add custom CSS to make the slider more visible
+        slider_css = """
+        <style>
+            /* Make the comparison slider more visible */
+            .leaflet-sbs-divider {
+                background-color: white !important;
+                width: 4px !important;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5) !important;
+                cursor: ew-resize !important;
+            }
+            .leaflet-sbs-range {
+                position: absolute;
+                top: 50%;
+                width: 100%;
+                z-index: 999;
+            }
+            /* Add a handle/grip to the slider */
+            .leaflet-sbs-divider:before {
+                content: '⬌';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 10px;
+                border-radius: 50%;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                font-size: 20px;
+                color: #3498db;
+            }
+        </style>
+        """
+        
         # Insert before closing head tag
         if "</head>" in html_content:
-            html_content = html_content.replace("</head>", f"{polyfill}\n</head>")
+            html_content = html_content.replace("</head>", f"{polyfill}\n{slider_css}\n</head>")
         else:
             # Fallback: insert at start of body
             html_content = html_content.replace("<body>", f"<body>\n{polyfill}")
@@ -275,7 +317,7 @@ class MapWidget(QWidget):
         if not raster_a or not raster_b:
             logger.warning("Missing raster data for comparison")
             return
-        self.clear_all_layers()
+        self.clear_all_layers(show_blank=False)
         name_a = raster_a.get('name', 'Image A')
         name_b = raster_b.get('name', 'Image B')
         # Add layers but don't render yet

@@ -10,7 +10,7 @@ from PyQt5.QtGui import QIcon
 # FEATURE FLAG: Toggle between Folium and PyQtGraph
 # Set to True to use new PyQtGraph widget (requires: pip install pyqtgraph PyOpenGL)
 # Set to False to use legacy Folium widget
-USE_PYQTGRAPH = False  # Will be enabled after dependencies are installed
+USE_PYQTGRAPH = True  # Enabled for full-resolution imagery display
 
 if USE_PYQTGRAPH:
     try:
