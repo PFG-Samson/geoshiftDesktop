@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (
     QHeaderView, QMessageBox, QFileDialog, QComboBox
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtGui import QIcon
 
 # FEATURE FLAG: Toggle between Folium and PyQtGraph
 # Set to True to use new PyQtGraph widget (requires: pip install pyqtgraph PyOpenGL)
@@ -62,6 +63,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Geoshift Desktop - Change Detection Platform")
         self.resize(1280, 850)
+        
+        # Set window icon using the logo
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'icons', 'logo.ico')
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
         
         self.state = AppState()
         self.models_manager = get_models_manager()

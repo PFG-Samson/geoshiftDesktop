@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Application-specific
+# Preview images (generated at runtime)
+assets/previews/*.png
+assets/previews/*.jpg
+assets/previews/*.tif
+
+# Change detection outputs
+change_mask.png
+output/
+
+# Logs
+logs/*.log
+
+# Test outputs
+.pytest_cache/
+*.coverage
+htmlcov/
